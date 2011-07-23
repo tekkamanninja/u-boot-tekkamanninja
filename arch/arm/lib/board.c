@@ -649,6 +649,13 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	debug ("init finish! goto command loop!\n");
 	gpio->GPKDAT &= ~0x10;
 #endif
+	{
+		uchar ramsize[10];
+		sprintf(ramsize, "%dM", (gd->ram_size/1024/1024));
+		if (setenv("ramsize", ramsize) != 0)	{
+			printf("set ramsize error!!\n");
+		}
+	}
 	/* main_loop() can return to retry autoboot, if so just run it again. */
 	for (;;) {
 		main_loop ();

@@ -102,9 +102,9 @@ lowlevel_init:
 	/* Xm0CSn2 = NFCON CS0, Xm0CSn3 = NFCON CS1 */
 	mov	r1, #S3C64XX_MEM_SYS_CFG_NAND
 	str	r1, [r0]
-
+#ifdef CONFIG_NAND_SPL
 	bl	mem_ctrl_asm_init
-
+#endif
 /* Wakeup support. Don't know if it's going to be used, untested. */
 	ldr	r0, =(ELFIN_CLOCK_POWER_BASE + RST_STAT_OFFSET)
 	ldr	r1, [r0]
