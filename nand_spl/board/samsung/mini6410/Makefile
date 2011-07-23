@@ -87,6 +87,13 @@ $(obj)nand_boot.c:
 	@rm -f $@
 	@ln -s $(TOPDIR)/nand_spl/nand_boot.c $@
 
+# from nand_spl/board/samsung/mini6410 directory
+$(obj)mmc_boot.c:
+ifneq ($(OBJTREE),$(SRCTREE))
+	@rm -f $@
+	@ln -s $(TOPDIR)/nand_spl/board/samsung/mini6410/mmc_boot.c $@
+endif
+
 # from drivers/mtd/nand directory
 $(obj)nand_ecc.c:
 	@rm -f $@
