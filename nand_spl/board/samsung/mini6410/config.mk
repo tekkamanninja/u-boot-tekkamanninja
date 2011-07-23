@@ -1,9 +1,6 @@
 #
-# (C) Copyright 2000-2003
-# Wolfgang Denk, DENX Software Engineering, wd@denx.de.
-#
-# (C) Copyright 2008
-# Guennadi Liakhovetki, DENX Software Engineering, <lg@denx.de>
+# (C) Copyright 2006
+# Stefan Roese, DENX Software Engineering, sr at denx.de.
 #
 # See file CREDITS for list of people who contributed to this
 # project.
@@ -23,28 +20,22 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307 USA
 #
+#
+# FriendlyARM MINI6410 development board, based on
+# Samsung S3C64xx Reference Platform (smdk6400) board
 
-include $(TOPDIR)/config.mk
+# CONFIG_SYS_TEXT_BASE for SPL:
+#
+# On S3C64xx platforms the SPL is located in SRAM at 0.
+#
+# CONFIG_SYS_TEXT_BASE = 0
 
-LIB	= $(obj)lib$(SOC).o
+include $(TOPDIR)/board/$(BOARDDIR)/config.mk
 
-SOBJS	= reset.o
+# PAD_TO used to generate a 4kByte binary needed for the combined image
+# -> PAD_TO = CONFIG_SYS_TEXT_BASE + 4096
+PAD_TO	:= $(shell expr $(CONFIG_SYS_TEXT_BASE) + 4096)
 
-COBJS-$(CONFIG_S3C64XX)	+= cpu_init.o speed.o
-COBJS-y	+= timer.o
-
-OBJS	:= $(addprefix $(obj),$(SOBJS) $(COBJS-y))
-
-all:	$(obj).depend $(START) $(LIB)
-
-$(LIB):	$(OBJS)
-	$(call cmd_link_o_target, $(OBJS))
-
-#########################################################################
-
-# defines $(obj).depend target
-include $(SRCTREE)/rules.mk
-
-sinclude $(obj).depend
-
-#########################################################################
+ifeq ($(debug),1)
+PLATFORM_CPPFLAGS += -DDEBUG
+endif

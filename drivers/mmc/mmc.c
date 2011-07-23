@@ -68,11 +68,19 @@ struct mmc *find_mmc_device(int dev_num)
 	list_for_each(entry, &mmc_devices) {
 		m = list_entry(entry, struct mmc, link);
 
-		if (m->block_dev.dev == dev_num)
+		if (m->block_dev.dev == dev_num) {
+			if (m->detect_mmc) {
+				if (m->detect_mmc((struct mmc_host *)m->priv) == 0) {
+					printf("No SD/MMC card detected!\n");		
+					return NULL;
+				}
+			}		
+
 			return m;
+		}
 	}
 
-	printf("MMC Device %d not found\n", dev_num);
+	printf("MMC Host control CH%d not found\n", dev_num);
 
 	return NULL;
 }
@@ -302,6 +310,10 @@ sd_send_op_cond(struct mmc *mmc)
 	mmc->ocr = cmd.response[0];
 
 	mmc->high_capacity = ((mmc->ocr & OCR_HCS) == OCR_HCS);
+	
+	if (mmc->high_capacity)	{
+		printf("SD card is SDHC!\n");
+	}
 	mmc->rca = 0;
 
 	return 0;
@@ -337,6 +349,10 @@ int mmc_send_op_cond(struct mmc *mmc)
 	mmc->ocr = cmd.response[0];
 
 	mmc->high_capacity = ((mmc->ocr & OCR_HCS) == OCR_HCS);
+	
+	if (mmc->high_capacity)	{
+		printf("SD card is SDHC!\n");
+	}
 	mmc->rca = 0;
 
 	return 0;
@@ -449,7 +465,7 @@ int sd_switch(struct mmc *mmc, int mode, int group, u8 value, u8 *resp)
 	return mmc_send_cmd(mmc, &cmd, &data);
 }
 
-
+//FIXME: there're some problems on SCR read function
 int sd_change_freq(struct mmc *mmc)
 {
 	int err;
@@ -500,12 +516,15 @@ retry_scr:
 	switch ((mmc->scr[0] >> 24) & 0xf) {
 		case 0:
 			mmc->version = SD_VERSION_1_0;
+			printf("SD card is SD_VERSION_1_0\n");
 			break;
 		case 1:
 			mmc->version = SD_VERSION_1_10;
+			printf("SD card is SD_VERSION_1_10\n");
 			break;
 		case 2:
 			mmc->version = SD_VERSION_2;
+			printf("SD card is SD_VERSION_2\n");
 			break;
 		default:
 			mmc->version = SD_VERSION_1_0;
@@ -818,6 +837,8 @@ int mmc_startup(struct mmc *mmc)
 			(mmc->cid[2] >> 24) & 0xf);
 	init_part(&mmc->block_dev);
 
+	printf("SD/MMC size : %d block * %dB = %dMB\n", 
+		mmc->block_dev.lba, mmc->read_bl_len, mmc->block_dev.lba/2/1024);
 	return 0;
 }
 
@@ -925,7 +946,7 @@ void print_mmc_devices(char separator)
 	list_for_each(entry, &mmc_devices) {
 		m = list_entry(entry, struct mmc, link);
 
-		printf("%s: %d", m->name, m->block_dev.dev);
+		printf("%s: Host controler CH%d", m->name, m->block_dev.dev);
 
 		if (entry->next != &mmc_devices)
 			printf("%c ", separator);

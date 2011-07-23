@@ -95,6 +95,9 @@ const struct ctfb_vesa_modes vesa_modes[VESA_MODES_COUNT] = {
 	{0x319, RES_MODE_1280x1024, 15},
 	{0x31A, RES_MODE_1280x1024, 16},
 	{0x31B, RES_MODE_1280x1024, 24},
+	{0x211, RES_MODE_240x320, 16},
+	{0x212, RES_MODE_480x272, 16},
+	{0x213, RES_MODE_800x480, 16},
 };
 const struct ctfb_res_modes res_mode_init[RES_MODES_COUNT] = {
 	/* x	 y pixclk   le	ri  up	lo   hs vs  s  vmode */
@@ -104,7 +107,11 @@ const struct ctfb_res_modes res_mode_init[RES_MODES_COUNT] = {
 	{960, 720, 13100, 160, 40, 32, 8, 80, 4, 0, FB_VMODE_NONINTERLACED},
 	{1152, 864, 12004, 200, 64, 32, 16, 80, 4, 0, FB_VMODE_NONINTERLACED},
 	{1280, 1024, 9090, 200, 48, 26, 1, 184, 3, 0, FB_VMODE_NONINTERLACED},
+	{240,   320,    90000, 1,     4,      1,     1,     30,     4, 0, FB_VMODE_NONINTERLACED},
+	{480,   272,    75000, 2,     3,      1,      1,     40,     1, 0, FB_VMODE_NONINTERLACED},  
+	{800,   480,    50000, 2,     2,      2,      2,     41,     4, 0, FB_VMODE_NONINTERLACED}, 
 };
+
 
 /************************************************************************
  * Get Parameters for the video mode:

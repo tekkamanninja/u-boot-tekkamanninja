@@ -130,6 +130,36 @@ check_dmc1_ready:
 	bne	check_dmc1_ready
 	nop
 
+#if defined(CONFIG_MINI6410)
+/* ------------------------------------------------------------------------- */
+#define SROM_BC1_REG_Tacs     (0x0)   // 0clk         address set-up
+#define SROM_BC1_REG_Tcos     (0x4)   // 4clk         chip selection set-up
+#define SROM_BC1_REG_Tacc     (0xE)   // 14clk        access cycle
+#define SROM_BC1_REG_Tcoh     (0x1)   // 1clk         chip selection hold
+#define SROM_BC1_REG_Tah      (0x4)   // 4clk         address holding time
+#define SROM_BC1_REG_Tacp     (0x6)   // 6clk         page mode access cycle
+#define SROM_BC1_REG_PMC      (0x0)   // normal(1data)page mode configuration
+
+#define SROM_BW_REG_DATA	((1<<7) | (1<<6) | (1<<4))
+#define SROM_BW_REG_BC1		(0xf << 4)
+#define SROM_BC1_REG_DATA	((SROM_BC1_REG_Tacs << 28) | (SROM_BC1_REG_Tcos << 24) | \
+				(SROM_BC1_REG_Tacc << 16) | (SROM_BC1_REG_Tcoh << 12) | \
+				(SROM_BC1_REG_Tah << 8) | (SROM_BC1_REG_Tacp << 4) | \
+				(SROM_BC1_REG_PMC))
+
+	ldr	r0, =ELFIN_SROM_BASE
+
+	ldr	r1, [r0, #SROM_BW_REG_DATA]
+	mov	r2, #(~SROM_BW_REG_BC1)
+	and	r1, r1, r2
+	mov	r2, #SROM_BW_REG_DATA
+	orr	r1, r1, r2	
+	str	r1, [r0, #INDEX_SROM_BW_REG]
+
+	ldr	r1, =SROM_BC1_REG_DATA
+	str	r1, [r0, #INDEX_SROM_BC1_REG]
+#endif
+
 	mov	pc, lr
 
 	.ltorg

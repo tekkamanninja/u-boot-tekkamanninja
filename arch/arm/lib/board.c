@@ -60,6 +60,9 @@
 #ifdef CONFIG_DRIVER_LAN91C96
 #include "../drivers/net/lan91c96.h"
 #endif
+#if defined(CONFIG_MINI6410_LED)
+#include <asm/arch/s3c6400.h>
+#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -274,7 +277,9 @@ void board_init_f (ulong bootflag)
 	init_fnc_t **init_fnc_ptr;
 	gd_t *id;
 	ulong addr, addr_sp;
-
+#if defined(CONFIG_MINI6410_LED)
+	s3c64xx_gpio * const gpio = s3c64xx_get_base_gpio();
+#endif
 	/* Pointer is writable since we allocated a register for it */
 	gd = (gd_t *) ((CONFIG_SYS_INIT_SP_ADDR) & ~0x07);
 	/* compiler optimization barrier needed for GCC >= 3.4 */
@@ -368,8 +373,11 @@ void board_init_f (ulong bootflag)
 	addr -= gd->mon_len;
 	addr &= ~(4096 - 1);
 
-	debug ("Reserving %ldk for U-Boot at: %08lx\n", gd->mon_len >> 10, addr);
+#if defined(CONFIG_SKIP_RELOCATE_UBOOT)
+	addr = CONFIG_SYS_PHY_UBOOT_BASE;		//FIXME
+#endif
 
+	debug ("Reserving %ldk for U-Boot at: %08lx\n", gd->mon_len >> 10, addr);
 #ifndef CONFIG_PRELOADER
 	/*
 	 * reserve memory for malloc() arena
@@ -384,6 +392,7 @@ void board_init_f (ulong bootflag)
 	addr_sp -= sizeof (bd_t);
 	bd = (bd_t *) addr_sp;
 	gd->bd = bd;
+
 	debug ("Reserving %zu Bytes for Board Info at: %08lx\n",
 			sizeof (bd_t), addr_sp);
 	addr_sp -= sizeof (gd_t);
@@ -409,13 +418,12 @@ void board_init_f (ulong bootflag)
 #endif
 
 	debug ("New Stack Pointer is: %08lx\n", addr_sp);
-
 #ifdef CONFIG_POST
 	post_bootmode_init();
 	post_run (NULL, POST_ROM | post_bootmode_get(0));
 #endif
-
 	gd->bd->bi_baudrate = gd->baudrate;
+
 	/* Ram ist board specific, so move it to board code ... */
 	dram_init_banksize();
 	display_dram_config();	/* and display it */
@@ -425,10 +433,12 @@ void board_init_f (ulong bootflag)
 	gd->reloc_off = addr - _TEXT_BASE;
 	debug ("relocation Offset is: %08lx\n", gd->reloc_off);
 	memcpy (id, (void *)gd, sizeof (gd_t));
-
+#if defined(CONFIG_MINI6410_LED)
+	debug ("relocate_code : text --> 0X%p gd --> 0X%p sp --> 0X%p \n", 
+				 (void *)addr, (void *)id, (void *)addr_sp);
+	gpio->GPKDAT &= ~0x20;
+#endif
 	relocate_code (addr_sp, id, addr);
-
-	/* NOTREACHED - relocate_code() does not return */
 }
 
 #if !defined(CONFIG_SYS_NO_FLASH)
@@ -453,7 +463,9 @@ void board_init_r (gd_t *id, ulong dest_addr)
 #if !defined(CONFIG_SYS_NO_FLASH)
 	ulong flash_size;
 #endif
-
+#if defined(CONFIG_MINI6410_LED)
+	s3c64xx_gpio * const gpio = s3c64xx_get_base_gpio();
+#endif
 	gd = id;
 	bd = gd->bd;
 
@@ -633,7 +645,10 @@ void board_init_r (gd_t *id, ulong dest_addr)
 		setenv ("mem", (char *)memsz);
 	}
 #endif
-
+#if defined(CONFIG_MINI6410_LED)
+	debug ("init finish! goto command loop!\n");
+	gpio->GPKDAT &= ~0x10;
+#endif
 	/* main_loop() can return to retry autoboot, if so just run it again. */
 	for (;;) {
 		main_loop ();

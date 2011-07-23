@@ -854,6 +854,10 @@ Alex Züpke <azu@sysgo.de>
 	lart		SA1100
 	dnp1110		SA1110
 
+Alex Ling <kasimling at gmail.com>
+
+	MINI6410	ARM1176JZF-S (S3C6410)
+
 -------------------------------------------------------------------------
 
 Unknown / orphaned boards:

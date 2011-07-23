@@ -68,7 +68,7 @@ int env_init(void)
 int init_mmc_for_env(struct mmc *mmc)
 {
 	if (!mmc) {
-		puts("No MMC card found\n");
+		puts("No MMC card for env!\n");
 		return -1;
 	}
 
@@ -86,8 +86,11 @@ inline int write_env(struct mmc *mmc, unsigned long size,
 			unsigned long offset, const void *buffer)
 {
 	uint blk_start, blk_cnt, n;
-
+#if 0		/* cannot use more than 4G SD card */
 	blk_start = ALIGN(offset, mmc->write_bl_len) / mmc->write_bl_len;
+#endif
+
+	blk_start = (offset);
 	blk_cnt   = ALIGN(size, mmc->write_bl_len) / mmc->write_bl_len;
 
 	n = mmc->block_dev.block_write(CONFIG_SYS_MMC_ENV_DEV, blk_start,
@@ -129,8 +132,12 @@ inline int read_env(struct mmc *mmc, unsigned long size,
 {
 	uint blk_start, blk_cnt, n;
 
-	blk_start = ALIGN(offset, mmc->read_bl_len) / mmc->read_bl_len;
-	blk_cnt   = ALIGN(size, mmc->read_bl_len) / mmc->read_bl_len;
+#if 0		/* cannot use more than 4G SD card */
+	blk_start = ALIGN(offset, mmc->write_bl_len) / mmc->write_bl_len;
+#endif
+
+	blk_start = (offset);
+	blk_cnt   = ALIGN(size, mmc->write_bl_len) / mmc->write_bl_len;
 
 	n = mmc->block_dev.block_read(CONFIG_SYS_MMC_ENV_DEV, blk_start,
 					blk_cnt, (uchar *)buffer);
