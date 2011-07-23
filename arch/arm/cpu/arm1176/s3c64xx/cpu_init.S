@@ -130,6 +130,65 @@ check_dmc1_ready:
 	bne	check_dmc1_ready
 	nop
 
+#ifdef CONFIG_MEM_AUTO_ADAPT_MINI6410
+	ldr	r1, =CONFIG_MEM_TESTWORD1_MINI6410
+	ldr	r3, =CONFIG_MEM_TESTPOINT_MIRROR_MINI6410
+	ldr	r4, =CONFIG_MEM_TESTPOINT_MINI6410
+	str	r1, [r3]
+	ldr	r2, [r4]
+	cmp	r1, r2
+	bne	mem_ctrl_asm_init_end
+
+	ldr	r1, =CONFIG_MEM_TESTWORD2_MINI6410
+	str	r1, [r4]
+	ldr	r2, [r3]
+	cmp	r1, r2
+	bne	mem_ctrl_asm_init_end
+
+	ldr	r1, =0x3
+	str	r1, [r0, #INDEX_DMC_MEMC_CMD]
+
+check_dmc1_pause:
+	ldr	r1, [r0, #INDEX_DMC_MEMC_STATUS]
+	mov	r2, #0x3
+	and	r1, r1, r2
+	cmp	r1, #0x2
+	bne	check_dmc1_pause
+	nop
+
+	ldr	r1, =0x4
+	str	r1, [r0, #INDEX_DMC_MEMC_CMD]
+
+check_dmc1_config:
+	ldr	r1, [r0, #INDEX_DMC_MEMC_STATUS]
+	mov	r2, #0x3
+	and	r1, r1, r2
+	cmp	r1, #0x0
+	bne	check_dmc1_config
+	nop
+
+	ldr	r1, =DMC1_MEM_CFG_128MB
+	str	r1, [r0, #INDEX_DMC_MEMORY_CFG]
+
+	ldr	r1, =DMC1_CHIP0_CFG_128MB
+	str	r1, [r0, #INDEX_DMC_CHIP_0_CFG]
+	nop
+
+	/* Enable DMC1 */
+	mov	r1, #0x0
+	str	r1, [r0, #INDEX_DMC_MEMC_CMD]
+
+check_dmc1_ready_128m:
+	ldr	r1, [r0, #INDEX_DMC_MEMC_STATUS]
+	mov	r2, #0x3
+	and	r1, r1, r2
+	cmp	r1, #0x1
+	bne	check_dmc1_ready_128m
+	nop
+
+mem_ctrl_asm_init_end:
+#endif
+
 #if defined(CONFIG_MINI6410)
 /* ------------------------------------------------------------------------- */
 #define SROM_BC1_REG_Tacs     (0x0)   // 0clk         address set-up
