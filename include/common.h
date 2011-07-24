@@ -496,7 +496,7 @@ ulong	get_OPB_freq (void);
 ulong	get_PCI_freq (void);
 #endif
 #if defined(CONFIG_S3C2400) || defined(CONFIG_S3C2410) || \
-	defined(CONFIG_LH7A40X) || defined(CONFIG_S3C6400)
+	defined(CONFIG_LH7A40X) || defined(CONFIG_S3C6400) || defined(CONFIG_S3C2440)
 ulong	get_FCLK (void);
 ulong	get_HCLK (void);
 ulong	get_PCLK (void);

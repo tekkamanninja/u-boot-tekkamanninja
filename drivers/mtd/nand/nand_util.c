@@ -480,6 +480,26 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 	size_t left_to_write = *length;
 	size_t len_incl_bad;
 	u_char *p_buffer = buffer;
+#if defined(ENABLE_CMD_NAND_YAFFS)
+	/*Thanks for hugerat's code*/
+	//è¿æ®µçšåºäž»èŠæ¯ä»yaffsæ åäž­æåèŠåå¥çæ­£åžžæ°æ®çé¿åºŠïŒå³äžåæ¬oobæ°æ®çæ°æ®é¿åºŠ
+	if(nand->rw_oob==1)	{
+		size_t oobsize = nand->oobsize;  //å®ä¹oobsizeçå€§å°
+		size_t datasize = nand->writesize;
+		int datapages = 0;
+
+	    //é¿åºŠäžæ¯528æŽæ°åïŒè®€äžºæ°æ®åºéã
+		if (((*length)%(nand->oobsize+nand->writesize)) != 0) {
+		    printf ("Attempt to write error length data!\n");
+		    return -EINVAL;
+	    }
+
+		datapages = *length/(datasize+oobsize);
+		*length = datapages*datasize;
+		left_to_write = *length;
+//		nand->skipfirstblock=1;
+	}
+#endif
 
 	/* Reject writes, which are not page aligned */
 	if ((offset & (nand->writesize - 1)) != 0 ||
@@ -494,7 +514,9 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 		printf ("Attempt to write outside the flash area\n");
 		return -EINVAL;
 	}
-
+	
+#if !defined(ENABLE_CMD_NAND_YAFFS)
+/*by hugerat,phase 6 æ­€æ®µçšåºæ¬ææ¯æ²¡æååæ¶ïŒäžè¿è¡ååæ£æ¥çŽæ¥åïŒäœæ²¡æèŸŸå°ç®çïŒäžäœ¿æåå ççšåºäžèœæ­£åžžå·¥äœïŒæ³šæ*/
 	if (len_incl_bad == *length) {
 		rval = nand_write (nand, offset, length, buffer);
 		if (rval != 0)
@@ -503,7 +525,7 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 
 		return rval;
 	}
-
+#endif
 	while (left_to_write > 0) {
 		size_t block_offset = offset & (nand->erasesize - 1);
 		size_t write_size;
@@ -516,12 +538,21 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 			offset += nand->erasesize - block_offset;
 			continue;
 		}
-
+#if defined(ENABLE_CMD_NAND_YAFFS)
+		/*Thanks for hugerat's code*/
+		if(nand->skipfirstblk==1)	{		//åŠéè·³è¿ç¬¬äžäžªå¥œåïŒåè·³è¿ç¬¬äžäžªå¥œåã
+			nand->skipfirstblk=0;
+			printf ("Skip the first good block %llx\n",
+				offset & ~(nand->erasesize - 1));
+			offset += nand->erasesize - block_offset;
+			continue;
+		}
+#endif
 		if (left_to_write < (nand->erasesize - block_offset))
 			write_size = left_to_write;
 		else
 			write_size = nand->erasesize - block_offset;
-
+		printf("\rWriting at 0x%llx -- ",offset);	/*Thanks for hugerat's code*/
 		rval = nand_write (nand, offset, &write_size, p_buffer);
 		if (rval != 0) {
 			printf ("NAND write to offset %llx failed %d\n",
@@ -531,8 +562,18 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 		}
 
 		left_to_write -= write_size;
+		printf("%d%% is complete.",100-(left_to_write/(*length/100)));/*Thanks for hugerat's code*/
 		offset        += write_size;
+#if defined(ENABLE_CMD_NAND_YAFFS)
+		/*Thanks for hugerat's code*/
+		if(nand->rw_oob==1)	{
+			p_buffer += write_size+(write_size/nand->writesize*nand->oobsize);
+		} else	{
+			p_buffer += write_size;
+		}
+#else
 		p_buffer      += write_size;
+#endif
 	}
 
 	return 0;

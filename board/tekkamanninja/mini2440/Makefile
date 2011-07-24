@@ -23,22 +23,23 @@
 
 include $(TOPDIR)/config.mk
 
-LIB	= $(obj)lib$(SOC).a
+LIB	= $(obj)lib$(BOARD).a
 
-COBJS-$(CONFIG_USE_IRQ) += interrupts.o
-COBJS-y	+= speed.o
-COBJS-y	+= timer.o
-COBJS-y	+= usb.o
-COBJS-y	+= usb_ohci.o
-COBJS-y	+= mmc.o
+COBJS	:= nand_read.o mini2440.o  flash.o 
+SOBJS	:= lowlevel_init.o
 
-SRCS	:= $(SOBJS:.o=.S) $(COBJS-y:.o=.c)
-OBJS	:= $(addprefix $(obj),$(SOBJS) $(COBJS-y))
+SRCS	:= $(SOBJS:.o=.S) $(COBJS:.o=.c)
+OBJS	:= $(addprefix $(obj),$(COBJS))
+SOBJS	:= $(addprefix $(obj),$(SOBJS))
 
-all:	$(obj).depend $(LIB)
+$(LIB):	$(obj).depend $(OBJS) $(SOBJS)
+	$(AR) $(ARFLAGS) $@ $(OBJS) $(SOBJS)
 
-$(LIB):	$(OBJS)
-	$(AR) $(ARFLAGS) $@ $(OBJS)
+clean:
+	rm -f $(SOBJS) $(OBJS)
+
+distclean:	clean
+	rm -f $(LIB) core *.bak $(obj).depend
 
 #########################################################################
 
