@@ -76,7 +76,7 @@
 #include "videomodes.h"
 
 const struct ctfb_vesa_modes vesa_modes[VESA_MODES_COUNT] = {
-	{0x301, RES_MODE_640x480, 8},
+    {0x301, RES_MODE_640x480, 8},
 	{0x310, RES_MODE_640x480, 15},
 	{0x311, RES_MODE_640x480, 16},
 	{0x312, RES_MODE_640x480, 24},
@@ -95,15 +95,17 @@ const struct ctfb_vesa_modes vesa_modes[VESA_MODES_COUNT] = {
 	{0x319, RES_MODE_1280x1024, 15},
 	{0x31A, RES_MODE_1280x1024, 16},
 	{0x31B, RES_MODE_1280x1024, 24},
+	{0x211, RES_MODE_240x320, 16},
 };
 const struct ctfb_res_modes res_mode_init[RES_MODES_COUNT] = {
-	/* x	 y pixclk   le	ri  up	lo   hs vs  s  vmode */
-	{640, 480, 39721, 40, 24, 32, 11, 96, 2, 0, FB_VMODE_NONINTERLACED},
-	{800, 600, 27778, 64, 24, 22, 1, 72, 2, 0, FB_VMODE_NONINTERLACED},
-	{1024, 768, 15384, 168, 8, 29, 3, 144, 4, 0, FB_VMODE_NONINTERLACED},
-	{960, 720, 13100, 160, 40, 32, 8, 80, 4, 0, FB_VMODE_NONINTERLACED},
-	{1152, 864, 12004, 200, 64, 32, 16, 80, 4, 0, FB_VMODE_NONINTERLACED},
-	{1280, 1024, 9090, 200, 48, 26, 1, 184, 3, 0, FB_VMODE_NONINTERLACED},
+	/* x	 y      pixclk   le	    ri      up	    lo      hs      vs  s  vmode */
+	{640,   480,    39721,  40,     24,     32,     11,     96,     2, 0, FB_VMODE_NONINTERLACED},
+	{800,   600,    27778,  64,     24,     22,     1,      72,     2, 0, FB_VMODE_NONINTERLACED},
+	{1024,  768,    15384,  168,    8,      29,     3,      144,    4, 0, FB_VMODE_NONINTERLACED},
+	{960,   720,    13100,  160,    40,     32,     8,      80,     4, 0, FB_VMODE_NONINTERLACED},
+	{1152,  864,    12004,  200,    64,     32,     16,     80,     4, 0, FB_VMODE_NONINTERLACED},
+	{1280,  1024,   9090,   200,    48,     26,     1,      184,    3, 0, FB_VMODE_NONINTERLACED},
+	{240,   320,    158025, 26,     6,      1,      11,     37,     2, 0, FB_VMODE_NONINTERLACED},
 };
 
 /************************************************************************

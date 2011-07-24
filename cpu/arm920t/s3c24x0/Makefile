@@ -30,7 +30,7 @@ COBJS-y	+= speed.o
 COBJS-y	+= timer.o
 COBJS-y	+= usb.o
 COBJS-y	+= usb_ohci.o
-
+COBJS-y	+= mmc.o
 
 SRCS	:= $(SOBJS:.o=.S) $(COBJS-y:.o=.c)
 OBJS	:= $(addprefix $(obj),$(SOBJS) $(COBJS-y))

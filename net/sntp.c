@@ -12,7 +12,7 @@
 
 #include "sntp.h"
 
-#define SNTP_TIMEOUT 10000UL
+#define SNTP_TIMEOUT (10000UL*CONFIG_SYS_HZ/1000)
 
 static int SntpOurPort;
 

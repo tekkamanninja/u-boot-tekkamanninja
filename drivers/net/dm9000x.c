@@ -374,12 +374,14 @@ static int dm9000_init(struct eth_device *dev, bd_t *bd)
 	while (!(phy_read(1) & 0x20)) {	/* autonegation complete bit */
 		udelay(1000);
 		i++;
-		if (i == 10000) {
-			printf("could not establish link\n");
-			return 0;
+		if (i == 1650) {
+//			printf("could not establish link\n");
+//			return 0;
+			break;
 		}
 	}
 
+# if 1
 	/* see what we've got */
 	lnk = phy_read(17) >> 12;
 	printf("operating at ");
@@ -401,6 +403,7 @@ static int dm9000_init(struct eth_device *dev, bd_t *bd)
 		break;
 	}
 	printf("mode\n");
+#endif
 	return 0;
 }
 

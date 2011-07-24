@@ -169,7 +169,7 @@
 #define MMC_RSP_R6      (MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE)
 #define MMC_RSP_R7      (MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE)
 
-
+#if 0
 struct mmc_cid {
 	unsigned long psn;
 	unsigned short oid;
@@ -218,7 +218,7 @@ struct mmc_csd
 	u8	crc:7;
 	u8	one:1;
 };
-
+#endif
 struct mmc_cmd {
 	ushort cmdidx;
 	uint resp_type;
@@ -268,8 +268,10 @@ struct mmc {
 
 int mmc_register(struct mmc *mmc);
 int mmc_initialize(bd_t *bis);
-int mmc_init(struct mmc *mmc);
-int mmc_read(struct mmc *mmc, u64 src, uchar *dst, int size);
+//int mmc_init(struct mmc *mmc);
+//int mmc_read(struct mmc *mmc, u64 src, uchar *dst, int size);
+int mmc_init(int verbose);
+int mmc_read(ulong src, uchar *dst, int size);
 struct mmc *find_mmc_device(int dev_num);
 void print_mmc_devices(char separator);
 

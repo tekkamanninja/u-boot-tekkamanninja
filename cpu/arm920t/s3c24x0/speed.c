@@ -30,11 +30,11 @@
  */
 
 #include <common.h>
-#if defined(CONFIG_S3C2400) || defined (CONFIG_S3C2410) || defined (CONFIG_TRAB)
+#if defined(CONFIG_S3C2400) || defined (CONFIG_S3C2410) || defined (CONFIG_TRAB) || defined (CONFIG_S3C2440)
 
 #if defined(CONFIG_S3C2400)
 #include <s3c2400.h>
-#elif defined(CONFIG_S3C2410)
+#elif defined(CONFIG_S3C2410) || defined (CONFIG_S3C2440)
 #include <s3c2410.h>
 #endif
 
@@ -66,6 +66,13 @@ static ulong get_PLLCLK(int pllreg)
     m = ((r & 0xFF000) >> 12) + 8;
     p = ((r & 0x003F0) >> 4) + 2;
     s = r & 0x3;
+//tekkaman
+#if defined(CONFIG_S3C2440)
+	if (pllreg == MPLL)
+	return ((CONFIG_SYS_CLK_FREQ * m * 2) /(p << s));
+	else if (pllreg == UPLL)
+#endif
+//tekkaman
 
     return((CONFIG_SYS_CLK_FREQ * m) / (p << s));
 }
@@ -80,8 +87,20 @@ ulong get_FCLK(void)
 ulong get_HCLK(void)
 {
     S3C24X0_CLOCK_POWER * const clk_power = S3C24X0_GetBase_CLOCK_POWER();
-
-    return((clk_power->CLKDIVN & 0x2) ? get_FCLK()/2 : get_FCLK());
+//tekkaman
+#if defined(CONFIG_S3C2440)
+	if (clk_power->CLKDIVN & 0x6) 
+				{
+				if ((clk_power->CLKDIVN & 0x6)==2) return(get_FCLK()/2);
+				if ((clk_power->CLKDIVN & 0x6)==6) return((clk_power->CAMDIVN & 0x100) ? get_FCLK()/6 : get_FCLK()/3);
+				if ((clk_power->CLKDIVN & 0x6)==4) return((clk_power->CAMDIVN & 0x200) ? get_FCLK()/8 : get_FCLK()/4);
+				return(get_FCLK());
+				}
+	else	return(get_FCLK());
+#else
+	return((clk_power->CLKDIVN & 0x2) ? get_FCLK()/2 : get_FCLK());
+#endif
+//tekkaman
 }
 
 /* return PCLK frequency */

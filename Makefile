@@ -157,7 +157,7 @@ sinclude $(obj)include/autoconf.mk
 # load ARCH, BOARD, and CPU configuration
 include $(obj)include/config.mk
 export	ARCH CPU BOARD VENDOR SOC
-
+CROSS_COMPILE =  arm-9tdmi-linux-gnu-
 # set default to nothing for native builds
 ifeq ($(HOSTARCH),$(ARCH))
 CROSS_COMPILE ?=
@@ -286,7 +286,7 @@ U_BOOT_ONENAND = $(obj)u-boot-onenand.bin
 endif
 
 __OBJS := $(subst $(obj),,$(OBJS))
-__LIBS := $(subst $(obj),,$(LIBS)) $(subst $(obj),,$(LIBBOARD))
+__LIBS := $(subst $(obj),,$(LIBBOARD)) $(subst $(obj),,$(LIBS)) 
 
 #########################################################################
 #########################################################################
@@ -2996,6 +2996,9 @@ smdk2400_config	:	unconfig
 
 smdk2410_config	:	unconfig
 	@$(MKCONFIG) $(@:_config=) arm arm920t smdk2410 samsung s3c24x0
+ 
+mini2440_config	:	unconfig
+	@$(MKCONFIG) $(@:_config=) arm arm920t mini2440 tekkamanninja s3c24x0
 
 SX1_stdout_serial_config \
 SX1_config:		unconfig

@@ -88,7 +88,7 @@ typedef enum { INIT,
 #define DHCP_NAK      6
 #define DHCP_RELEASE  7
 
-#define SELECT_TIMEOUT 3000UL	/* Milliseconds to wait for offers */
+#define SELECT_TIMEOUT (CONFIG_SYS_HZ/1000*3000UL)	/* Milliseconds to wait for offers */
 
 /**********************************************************************/
 

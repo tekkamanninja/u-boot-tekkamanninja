@@ -101,7 +101,7 @@
 DECLARE_GLOBAL_DATA_PTR;
 
 #ifndef	CONFIG_ARP_TIMEOUT
-# define ARP_TIMEOUT		5000UL	/* Milliseconds before trying ARP again */
+# define ARP_TIMEOUT		(CONFIG_SYS_HZ/1000*5000UL)	/* Milliseconds before trying ARP again */
 #else
 # define ARP_TIMEOUT		CONFIG_ARP_TIMEOUT
 #endif
@@ -570,7 +570,7 @@ void NetStartAgain (void)
 		return;
 	}
 #ifndef CONFIG_NET_MULTI
-	NetSetTimeout (10000UL, startAgainTimeout);
+	NetSetTimeout (10000UL*CONFIG_SYS_HZ/1000, startAgainTimeout);
 	NetSetHandler (startAgainHandler);
 #else	/* !CONFIG_NET_MULTI*/
 	eth_halt ();
@@ -581,7 +581,7 @@ void NetStartAgain (void)
 	if (NetRestartWrap) {
 		NetRestartWrap = 0;
 		if (NetDevExists && !once) {
-			NetSetTimeout (10000UL, startAgainTimeout);
+			NetSetTimeout (10000UL*CONFIG_SYS_HZ/1000, startAgainTimeout);
 			NetSetHandler (startAgainHandler);
 		} else {
 			NetState = NETLOOP_FAIL;
@@ -751,7 +751,7 @@ static void PingStart(void)
 #if defined(CONFIG_NET_MULTI)
 	printf ("Using %s device\n", eth_get_name());
 #endif	/* CONFIG_NET_MULTI */
-	NetSetTimeout (10000UL, PingTimeout);
+	NetSetTimeout (10000UL*CONFIG_SYS_HZ/1000, PingTimeout);
 	NetSetHandler (PingHandler);
 
 	PingSend();
@@ -774,7 +774,7 @@ static void PingStart(void)
 #define CDP_SYSOBJECT_TLV		0x0015
 #define CDP_MANAGEMENT_ADDRESS_TLV	0x0016
 
-#define CDP_TIMEOUT			250UL	/* one packet every 250ms */
+#define CDP_TIMEOUT			(250UL*CONFIG_SYS_HZ/1000)	/* one packet every 250ms */
 
 static int CDPSeq;
 static int CDPOK;

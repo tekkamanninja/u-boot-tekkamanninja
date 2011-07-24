@@ -50,7 +50,7 @@ int do_mmc (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 			return 1;
 		}
 
-		if (mmc_legacy_init(dev) != 0) {
+		if (mmc_init(dev) != 0) {
 			puts("No MMC card found\n");
 			return 1;
 		}

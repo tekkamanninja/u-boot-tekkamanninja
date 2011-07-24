@@ -33,7 +33,7 @@
 
 #define HASHES_PER_LINE 65	/* Number of "loading" hashes per line	*/
 #define NFS_RETRY_COUNT 30
-#define NFS_TIMEOUT 2000UL
+#define NFS_TIMEOUT (CONFIG_SYS_HZ/1000*2000UL)
 
 static int fs_mounted = 0;
 static unsigned long rpc_id = 0;
@@ -450,7 +450,7 @@ nfs_umountall_reply (uchar *pkt, unsigned len)
 
 	memcpy ((unsigned char *)&rpc_pkt, pkt, len);
 
-	if (ntohl(rpc_pkt.u.reply.id) != rpc_id)
+	if ((ntohl(rpc_pkt.u.reply.id)+1) != rpc_id)
 		return -1;
 
 	if (rpc_pkt.u.reply.rstatus  ||

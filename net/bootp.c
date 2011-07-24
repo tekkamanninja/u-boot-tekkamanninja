@@ -22,7 +22,8 @@
 
 #if defined(CONFIG_CMD_NET)
 
-#define TIMEOUT		5000UL	/* Milliseconds before trying BOOTP again */
+#define TIMEOUT		(5000UL*CONFIG_SYS_HZ/1000)
+	/* Milliseconds before trying BOOTP again */
 #ifndef CONFIG_NET_RETRY_COUNT
 # define TIMEOUT_COUNT	5		/* # of timeouts before giving up  */
 #else
@@ -633,7 +634,7 @@ BootpRequest (void)
 	bp->bp_htype = HWT_ETHER;
 	bp->bp_hlen = HWL_ETHER;
 	bp->bp_hops = 0;
-	bp->bp_secs = htons(get_timer(0) / 1000);
+	bp->bp_secs = htons(get_timer(0) / CONFIG_SYS_HZ);
 	NetWriteIP(&bp->bp_ciaddr, 0);
 	NetWriteIP(&bp->bp_yiaddr, 0);
 	NetWriteIP(&bp->bp_siaddr, 0);
@@ -811,7 +812,7 @@ static void DhcpSendRequestPkt(Bootp_t *bp_offer)
 	bp->bp_htype = HWT_ETHER;
 	bp->bp_hlen = HWL_ETHER;
 	bp->bp_hops = 0;
-	bp->bp_secs = htons(get_timer(0) / 1000);
+	bp->bp_secs = htons(get_timer(0) / CONFIG_SYS_HZ);
 	/* Do not set the client IP, your IP, or server IP yet, since it hasn't been ACK'ed by
 	 * the server yet */
 

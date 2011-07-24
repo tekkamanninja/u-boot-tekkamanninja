@@ -129,6 +129,12 @@ struct mtd_info {
 	 */
 	u_int32_t writesize;
 
+#if defined(ENABLE_CMD_NAND_YAFFS)
+		/*Thanks for hugerat's code*/
+	u_char rw_oob;
+	u_char skipfirstblk;
+#endif
+
 	u_int32_t oobsize;   /* Amount of OOB data per block (e.g. 16) */
 	u_int32_t oobavail;  /* Available OOB bytes per block */
 

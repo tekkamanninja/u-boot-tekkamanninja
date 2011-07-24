@@ -49,7 +49,7 @@
 #include <nand.h>
 #include <onenand_uboot.h>
 #include <mmc.h>
-
+#include <s3c2410.h>    //tekkamanninja
 #ifdef CONFIG_DRIVER_SMC91111
 #include "../drivers/net/smc91111.h"
 #endif
@@ -70,8 +70,10 @@ extern void dataflash_print_info(void);
 #define CONFIG_IDENT_STRING ""
 #endif
 
+//const char version_string[] =
+//	U_BOOT_VERSION" (" __DATE__ " - " __TIME__ ")"CONFIG_IDENT_STRING;
 const char version_string[] =
-	U_BOOT_VERSION" (" U_BOOT_DATE " - " U_BOOT_TIME ")"CONFIG_IDENT_STRING;
+	U_BOOT_VERSION;
 
 #ifdef CONFIG_DRIVER_CS8900
 extern void cs8900_get_enetaddr (void);
@@ -117,7 +119,7 @@ void *sbrk (ptrdiff_t increment)
 	return ((void *) old);
 }
 
-
+#if 0
 /************************************************************************
  * Coloured LED functionality
  ************************************************************************
@@ -141,7 +143,7 @@ void inline __blue_LED_on(void) {}
 void inline blue_LED_on(void)__attribute__((weak, alias("__blue_LED_on")));
 void inline __blue_LED_off(void) {}
 void inline blue_LED_off(void)__attribute__((weak, alias("__blue_LED_off")));
-
+#endif
 /************************************************************************
  * Init Utilities							*
  ************************************************************************
@@ -166,7 +168,17 @@ static int init_baudrate (void)
 
 static int display_banner (void)
 {
-	printf ("\n\n%s\n\n", version_string);
+#if defined(CONFIG_MINI2440_LED) 	
+		S3C24X0_GPIO * const gpio = S3C24X0_GetBase_GPIO();
+//		gpio->GPBDAT = 0x100; //tekkamanninja
+		gpio->GPBDAT = 0x101; //tekkamanninja
+	//åšäž²å£åå§ååconsoleåå§åå®æïŒäž²å£èŸåºä¿¡æ¯ä¹åïŒLED1ãLED2ãLED3äŒäº®èµ·ïŒ
+#endif
+
+
+	printf ("\n\n%s\n\n", version_string);	
+	printf (" modified by tekkamanninja (tekkamanninja@163.com)\n");
+	printf (" Love Linux forever!!\n\n");
 	debug ("U-Boot code: %08lX -> %08lX  BSS: -> %08lX\n",
 	       _armboot_start, _bss_start, _bss_end);
 #ifdef CONFIG_MODEM_SUPPORT
@@ -302,6 +314,9 @@ void start_armboot (void)
 	char *s;
 #if defined(CONFIG_VFD) || defined(CONFIG_LCD)
 	unsigned long addr;
+#endif
+#if defined(CONFIG_MINI2440_LED) 	
+		S3C24X0_GPIO * const gpio = S3C24X0_GetBase_GPIO();
 #endif
 
 	/* Pointer is writable since we allocated a register for it */
@@ -466,6 +481,18 @@ extern void davinci_eth_set_mac_addr (const u_int8_t *addr);
 	reset_phy();
 #endif
 #endif
+
+#if defined(CONFIG_MINI2440_LED) 	
+		gpio->GPBDAT = 0x0; //tekkamanninja
+	//åšè¿å¥åœä»€æç€ºç¬Šä¹åïŒåäžªLEDäŒåæ¶äº®èµ·ïŒ
+#endif
+ 
+#if defined(CONFIG_CFB_CONSOLE)        
+	printf ("%s\n", version_string);
+	printf ("modified by tekkamanninja\n(tekkamanninja@163.com)\n");
+	printf ("Love Linux forever!!\n");
+#endif
+
 	/* main_loop() can return to retry autoboot, if so just run it again. */
 	for (;;) {
 		main_loop ();

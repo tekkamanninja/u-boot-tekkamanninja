@@ -114,8 +114,8 @@ start_code:
 	orr	r0,r0,#0xd3
 	msr	cpsr,r0
 
-	bl coloured_LED_init
-	bl red_LED_on
+@	bl coloured_LED_init
+@	bl red_LED_on
 
 #if	defined(CONFIG_AT91RM9200DK) || defined(CONFIG_AT91RM9200EK)
 	/*
@@ -131,7 +131,7 @@ copyex:
 	bne	copyex
 #endif
 
-#if defined(CONFIG_S3C2400) || defined(CONFIG_S3C2410)
+#if defined(CONFIG_S3C2400) || defined(CONFIG_S3C2410)|| defined(CONFIG_S3C2440)
 	/* turn off the watchdog */
 
 # if defined(CONFIG_S3C2400)
@@ -144,6 +144,12 @@ copyex:
 #  define INTSUBMSK	0x4A00001C
 #  define CLKDIVN	0x4C000014	/* clock divisor register */
 # endif
+#define CLK_CTL_BASE 0x4C000000 /* tekkaman */
+#define MDIV_405 0x7f << 12 /* tekkaman */
+#define PSDIV_405 0x21 /* tekkaman */
+#define MDIV_200 0xa1 << 12 /* tekkaman */
+#define PSDIV_200 0x31 /* tekkaman */
+
 
 	ldr     r0, =pWTCON
 	mov     r1, #0x0
@@ -156,17 +162,53 @@ copyex:
 	ldr	r0, =INTMSK
 	str	r1, [r0]
 # if defined(CONFIG_S3C2410)
-	ldr	r1, =0x3ff
+	ldr	r1, =0x7ff
 	ldr	r0, =INTSUBMSK
 	str	r1, [r0]
 # endif
 
+#if defined(CONFIG_S3C2440)
+	ldr	r1, =0x7fff	
+	ldr	r0, =INTSUBMSK
+	str	r1, [r0]
+#endif
+
+
+#if defined(CONFIG_S3C2440)
+	/* FCLK:HCLK:PCLK = 1:4:8 */
+	ldr	r0, =CLKDIVN
+	mov	r1, #5
+	str	r1, [r0]
+	
+	mrc	p15, 0, r1, c1, c0, 0	
+	orr	r1, r1, #0xc0000000		
+	mcr	p15, 0, r1, c1, c0, 0	
+	
+	
+	mov	r1, #CLK_CTL_BASE	
+	mov	r2, #MDIV_405	
+	add	r2, r2, #PSDIV_405	
+	str	r2, [r1, #0x04]		/* MPLLCON tekkaman */
+
+#else
 	/* FCLK:HCLK:PCLK = 1:2:4 */
 	/* default FCLK is 120 MHz ! */
 	ldr	r0, =CLKDIVN
 	mov	r1, #3
 	str	r1, [r0]
-#endif	/* CONFIG_S3C2400 || CONFIG_S3C2410 */
+
+	
+	mrc	p15, 0, r1, c1, c0, 0	
+	orr	r1, r1, #0xc0000000	
+	mcr	p15, 0, r1, c1, c0, 0	/*write ctrl register tekkaman*/
+	
+	
+	mov	r1, #CLK_CTL_BASE	/* tekkaman*/
+	mov	r2, #MDIV_200	
+	add	r2, r2, #PSDIV_200	
+	str	r2, [r1, #0x04]
+#endif
+#endif	/* CONFIG_S3C2400 || CONFIG_S3C2410  || CONFIG_S3C2440*/
 
 	/*
 	 * we do sys-critical inits only at reboot,
@@ -176,13 +218,189 @@ copyex:
 	bl	cpu_init_crit
 #endif
 
-#ifndef CONFIG_SKIP_RELOCATE_UBOOT
-relocate:				/* relocate U-Boot to RAM	    */
+/***************** CHECK_CODE_POSITION ******************************************/
 	adr	r0, _start		/* r0 <- current position of code   */
 	ldr	r1, _TEXT_BASE		/* test if we run from flash or RAM */
 	cmp     r0, r1                  /* don't reloc during debug         */
 	beq     stack_setup
+/***************** CHECK_CODE_POSITION ******************************************/
 
+/***************** CHECK_BOOT_FLASH ******************************************/
+	ldr	r1, =( (4<<28)|(3<<4)|(3<<2) )		/* address of Internal SRAM  0x4000003C*/
+	mov	r0, #0		/* r0 = 0 */
+	str	r0, [r1]
+
+
+	mov	r1, #0x3c		/* address of men  0x0000003C*/
+	ldr	r0, [r1]
+	cmp	r0, #0
+	bne	relocate
+
+	/* recovery  */
+	ldr	r0, =(0xdeadbeef)
+	ldr	r1, =( (4<<28)|(3<<4)|(3<<2) )
+	str	r0, [r1]
+/***************** CHECK_BOOT_FLASH ******************************************/
+
+/***************** NAND_BOOT *************************************************/
+
+#define LENGTH_UBOOT 0x60000
+#define NAND_CTL_BASE 0x4E000000
+
+#ifdef CONFIG_S3C2440
+/* Offset */
+#define oNFCONF 0x00
+#define oNFCONT 0x04
+#define oNFCMD 0x08
+#define oNFSTAT 0x20
+
+	@ reset NAND
+	mov	r1, #NAND_CTL_BASE
+	ldr	r2, =( (7<<12)|(7<<8)|(7<<4)|(0<<0) )
+	str	r2, [r1, #oNFCONF]
+	ldr	r2, [r1, #oNFCONF]
+	
+	ldr	r2, =( (1<<4)|(0<<1)|(1<<0) )	@ Active low CE Control 
+	str	r2, [r1, #oNFCONT]
+	ldr	r2, [r1, #oNFCONT]
+	
+	ldr	r2, =(0x6)	@ RnB Clear
+	str	r2, [r1, #oNFSTAT]
+	ldr	r2, [r1, #oNFSTAT]
+	
+	mov	r2, #0xff	@ RESET command
+	strb	r2, [r1, #oNFCMD]
+	
+	mov	r3, #0	@ wait
+nand1: 
+	add	r3, r3, #0x1
+	cmp	r3, #0xa
+	blt	nand1
+
+nand2:
+	ldr	r2, [r1, #oNFSTAT]	@ wait ready
+	tst	r2, #0x4
+	beq	nand2
+	
+	
+	ldr	r2, [r1, #oNFCONT]
+	orr	r2, r2, #0x2	@ Flash Memory Chip Disable
+	str	r2, [r1, #oNFCONT]
+	
+	@ get read to call C functions (for nand_read())
+	ldr	sp, DW_STACK_START	@ setup stack pointer
+	mov	fp, #0	@ no previous frame, so fp=0
+
+	@ copy U-Boot to RAM
+	ldr	r0, =TEXT_BASE
+	mov	r1, #0x0
+	mov	r2, #LENGTH_UBOOT
+	bl	nand_read_ll
+	tst	r0, #0x0
+	beq	ok_nand_read
+
+bad_nand_read:
+loop2:
+	b	loop2	@ infinite loop
+ok_nand_read:
+	@ verify
+	mov	r0, #0
+	ldr	r1, =TEXT_BASE
+	mov	r2, #0x400	@ 4 bytes * 1024 = 4K-bytes
+go_next:
+	ldr	r3, [r0], #4
+	ldr	r4, [r1], #4
+	teq	r3, r4
+	bne	notmatch
+	subs	r2, r2, #4
+	beq	stack_setup
+	bne	go_next
+
+notmatch:
+loop3:
+	b	loop3	@ infinite loop
+#endif
+
+#ifdef	CONFIG_S3C2410
+
+/* Offset */
+#define oNFCONF 0x00
+#define oNFCMD 0x04
+#define oNFSTAT 0x10
+
+	@ reset NAND
+	mov	r1, #NAND_CTL_BASE
+	ldr	r2, =0xf830	@ initial value
+	str	r2, [r1, #oNFCONF]
+	ldr	r2, [r1, #oNFCONF]
+	bic	r2, r2, #0x800	@ enable chip
+	str	r2, [r1, #oNFCONF]
+	mov	r2, #0xff		@ RESET command
+	strb	r2, [r1, #oNFCMD]
+	
+	
+	mov	r3, #0	@ wait
+nand1:
+	add	r3, r3, #0x1
+	cmp	r3, #0xa
+	blt	nand1
+
+nand2:
+	ldr	r2, [r1, #oNFSTAT]	@ wait ready
+	tst	r2, #0x1
+	beq	nand2
+	
+	ldr	r2, [r1, #oNFCONF]
+	orr	r2, r2, #0x800	@ disable chip
+	str	r2, [r1, #oNFCONF]
+	
+	@ get read to call C functions (for nand_read())
+	ldr	sp, DW_STACK_START	@ setup stack pointer
+	mov	fp, #0	@ no previous frame, so fp=0
+	
+	@ copy U-Boot to RAM
+	ldr	r0, =TEXT_BASE
+	mov	r1, #0x0
+	mov	r2, #LENGTH_UBOOT
+	bl	nand_read_ll
+	tst	r0, #0x0
+	beq	ok_nand_read
+
+bad_nand_read:
+loop2:
+	b	loop2	@ infinite loop
+
+
+ok_nand_read:
+	@ verify
+	mov	r0, #0
+	ldr	r1, =TEXT_BASE
+	mov	r2, #0x400	@ 4 bytes * 1024 = 4K-bytes
+go_next:
+	ldr	r3, [r0], #4
+	ldr	r4, [r1], #4
+	teq	r3, r4
+	bne	notmatch
+	subs	r2, r2, #4
+	beq	stack_setup
+	bne	go_next
+
+notmatch:
+loop3:
+	b	loop3	@ infinite loop
+
+#endif
+/***************** NAND_BOOT *************************************************/
+
+/***************** NOR_BOOT *************************************************/
+relocate:				/* relocate U-Boot to RAM	    */
+      /*********** CHECK_FOR_MAGIC_NUMBER***************/
+	ldr	r1, =(0xdeadbeef)
+	cmp	r0, r1
+	bne	loop3
+      /*********** CHECK_FOR_MAGIC_NUMBER***************/
+	adr	r0, _start		/* r0 <- current position of code   */
+	ldr	r1, _TEXT_BASE		/* test if we run from flash or RAM */
 	ldr	r2, _armboot_start
 	ldr	r3, _bss_start
 	sub	r2, r3, r2		/* r2 <- size of armboot            */
@@ -193,7 +411,7 @@ copy_loop:
 	stmia	r1!, {r3-r10}		/* copy to   target address [r1]    */
 	cmp	r0, r2			/* until source end addreee [r2]    */
 	ble	copy_loop
-#endif	/* CONFIG_SKIP_RELOCATE_UBOOT */
+/***************** NOR_BOOT *************************************************/
 
 	/* Set up the stack						    */
 stack_setup:
@@ -217,8 +435,29 @@ clbss_l:str	r2, [r0]		/* clear loop...                    */
 
 	ldr	pc, _start_armboot
 
-_start_armboot:	.word start_armboot
+#if defined(CONFIG_MINI2440_LED)
+#define GPIO_CTL_BASE 0x56000000
+#define oGPIO_B 0x10
+#define oGPIO_CON 0x0
+/* R/W, Configures the pins of the port */
+#define oGPIO_DAT 0x4
+#define oGPIO_UP 0x8
+/* R/W, Pull-up disable register */
+	mov	r1, #GPIO_CTL_BASE
+	add	r1, r1, #oGPIO_B
+	ldr	r2, =0x295551
+	str	r2, [r1, #oGPIO_CON]
+	mov	r2, #0xff
+	str	r2, [r1, #oGPIO_UP]
+	ldr	r2, =0x1c1
+	str	r2, [r1, #oGPIO_DAT]
+#endif
 
+_start_armboot:	.word start_armboot
+#define STACK_BASE 0x33f00000
+#define STACK_SIZE 0x10000
+	.align	2
+DW_STACK_START:	.word	STACK_BASE+STACK_SIZE-4 
 
 /*
  *************************************************************************
