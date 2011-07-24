@@ -159,6 +159,7 @@ export	ARCH CPU BOARD VENDOR SOC
 ifeq ($(HOSTARCH),$(ARCH))
 CROSS_COMPILE ?=
 endif
+CROSS_COMPILE = arm-arm1176jzfs-linux-gnueabi-
 
 # load other configuration
 include $(TOPDIR)/config.mk
@@ -2240,6 +2241,20 @@ smdk6400_config	:	unconfig
 		echo "RAM_TEXT = 0xc7e00000" >> $(obj)board/samsung/smdk6400/config.tmp;\
 	fi
 	@$(MKCONFIG) smdk6400 arm arm1176 smdk6400 samsung s3c64xx
+	@echo "CONFIG_NAND_U_BOOT = y" >> $(obj)include/config.mk
+
+mini6410_noUSB_config   \
+mini6410_config :	unconfig
+	@mkdir -p $(obj)include $(obj)board/samsung/mini6410
+	@mkdir -p $(obj)nand_spl/board/samsung/mini6410
+	@echo "#define CONFIG_NAND_U_BOOT" > $(obj)include/config.h
+	@echo "CONFIG_NAND_U_BOOT = y" >> $(obj)include/config.mk
+	@if [ -z "$(findstring mini6410_noUSB_config,$@)" ]; then			\
+		echo "RAM_TEXT = 0x57e00000" >> $(obj)board/samsung/mini6410/config.tmp;\
+	else										\
+		echo "RAM_TEXT = 0xc7e00000" >> $(obj)board/samsung/mini6410/config.tmp;\
+	fi
+	@$(MKCONFIG) mini6410 arm arm1176 mini6410 samsung s3c64xx
 	@echo "CONFIG_NAND_U_BOOT = y" >> $(obj)include/config.mk
 
 #========================================================================

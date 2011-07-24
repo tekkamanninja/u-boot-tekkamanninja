@@ -1,9 +1,12 @@
 #
-# (C) Copyright 2000-2003
-# Wolfgang Denk, DENX Software Engineering, wd@denx.de.
+# (C) Copyright 2000, 2001, 2002
+# Wolfgang Denk, DENX Software Engineering, wd at denx.de.
 #
 # (C) Copyright 2008
-# Guennadi Liakhovetki, DENX Software Engineering, <lg@denx.de>
+# Guennadi Liakhovetki, DENX Software Engineering, <lg at denx.de>
+#
+# (C) Copyright 2010
+# Alex Ling, <kasimling at gmail.com>
 #
 # See file CREDITS for list of people who contributed to this
 # project.
@@ -26,20 +29,23 @@
 
 include $(TOPDIR)/config.mk
 
-LIB	= $(obj)lib$(SOC).a
+LIB	= $(obj)lib$(BOARD).a
 
-SOBJS	= reset.o
+COBJS-y	:= mini6410.o
+SOBJS	:= lowlevel_init.o
 
-COBJS-$(CONFIG_S3C6400)	+= cpu_init.o speed.o
-COBJS-$(CONFIG_S3C6410)	+= cpu_init.o speed.o
-COBJS-y	+= timer.o
+SRCS    := $(SOBJS:.o=.S) $(COBJS-y:.o=.c)
+OBJS	:= $(addprefix $(obj),$(COBJS-y))
+SOBJS	:= $(addprefix $(obj),$(SOBJS))
 
-OBJS	:= $(addprefix $(obj),$(SOBJS) $(COBJS-y))
+$(LIB):	$(obj).depend $(SOBJS) $(OBJS)
+	$(AR) $(ARFLAGS) $@ $(SOBJS) $(OBJS)
 
-all:	$(obj).depend $(START) $(LIB)
+clean:
+	rm -f $(SOBJS) $(OBJS)
 
-$(LIB):	$(OBJS)
-	$(AR) $(ARFLAGS) $@ $(OBJS)
+distclean:	clean
+	rm -f $(LIB) core *.bak $(obj).depend
 
 #########################################################################
 
