@@ -1966,7 +1966,7 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 		size_t oobsize = mtd->oobsize;  //å®ä¹oobsizeçå€§å°
 		size_t datasize = mtd->writesize;
 		int i = 0;
-		uint8_t oobtemp[16];
+		uint8_t oobtemp[oobsize];
 		int datapages = 0;
 		datapages = len/(datasize); //äŒ è¿æ¥çlenæ¯æ²¡æåæ¬oobçæ°æ®é¿åºŠ
 		for(i=0;i<(datapages);i++)	{
