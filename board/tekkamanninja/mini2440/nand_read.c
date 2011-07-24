@@ -59,7 +59,7 @@ struct boot_nand_t {
 	int page_size;
 	int block_size;
 	int bad_block_offset;
-	unsigned long size;
+//	unsigned long size;
 };
 
 #if 0
@@ -191,16 +191,19 @@ int nand_read_ll(unsigned char *buf, unsigned long start_addr, int size)
 		*nid = nand_id;
 	}	
 
-	if (nand_id == 0xec76) {	/* Samsung K91208 */
+       if (nand_id == 0xec76 ||		/* Samsung K91208 */
+           nand_id == 0xad76 ) {	/*Hynix HY27US08121A*/
 		nand.page_size = 512;
 		nand.block_size = 16 * 1024;
 		nand.bad_block_offset = 5;
-		nand.size = 0x4000000;
-	} else if (nand_id == 0xecf1) { /* Samsung K9F1G08U0B */
+	//	nand.size = 0x4000000;
+	} else if (nand_id == 0xecf1 ||	/* Samsung K9F1G08U0B */
+		   nand_id == 0xecda ||	/* Samsung K9F2G08U0B */
+		   nand_id == 0xecd3 )	{ /* Samsung K9K8G08 */
 		nand.page_size = 2048;
 		nand.block_size = 128 * 1024;
 		nand.bad_block_offset = nand.page_size;
-		nand.size = 0x8000000;
+	//	nand.size = 0x8000000;
 	} else {
 		return -1; // hang
 	}
