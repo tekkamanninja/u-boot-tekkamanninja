@@ -33,7 +33,7 @@
 
 #define HASHES_PER_LINE 65	/* Number of "loading" hashes per line	*/
 #define NFS_RETRY_COUNT 30
-#define NFS_TIMEOUT 2000UL
+#define NFS_TIMEOUT (10*2000UL)
 
 static int fs_mounted = 0;
 static unsigned long rpc_id = 0;
