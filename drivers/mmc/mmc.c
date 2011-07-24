@@ -328,6 +328,10 @@ sd_send_op_cond(struct mmc *mmc)
 	mmc->ocr = cmd.response[0];
 
 	mmc->high_capacity = ((mmc->ocr & OCR_HCS) == OCR_HCS);
+	
+	if (mmc->high_capacity)	{
+		printf("SD card is SDHC!\n");
+	}
 	mmc->rca = 0;
 
 	return 0;

@@ -404,14 +404,14 @@
 
 
 #if defined(LCD_VIDEO_BACKGROUND_IN_MMC)  
-#define MMC_LCD_VIDEO_BACKGROUND_POS	((mmc->block_dev.lba) - (MMC_BACKGROUND_POS_BACKWARD/MMC_BLKSIZE)-1024)
+#define MMC_LCD_VIDEO_BACKGROUND_POS	((mmc->block_dev.lba) - (MMC_BACKGROUND_POS_BACKWARD/MMC_BLKSIZE) - (1024 * mmc->high_capacity))
 #define MMC_LCD_VIDEO_BACKGROUND_BLKCNT		(MMC_LCD_VIDEO_BACKGROUND_SIZE / MMC_BLKSIZE)
 #endif
 
 #if defined(CONFIG_ENV_IS_IN_NAND)
 #define CONFIG_ENV_OFFSET		0x0080000
 #else defined(CONFIG_ENV_IS_IN_MMC)
-#define CONFIG_ENV_OFFSET		((mmc->block_dev.lba) - (MMC_ENV_POS_BACKWARD/MMC_BLKSIZE)-1024)
+#define CONFIG_ENV_OFFSET		((mmc->block_dev.lba) - (MMC_ENV_POS_BACKWARD/MMC_BLKSIZE) - (1024 * mmc->high_capacity))
 #define CONFIG_MMC_ENV_DST	(CONFIG_SYS_UBOOT_BASE + CONFIG_SYS_UBOOT_SIZE)
 /* OFFSET in block size to support  more than 4G size SD card */ 
 #endif
