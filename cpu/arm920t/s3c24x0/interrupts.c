@@ -38,9 +38,19 @@
 #endif
 #include <asm/proc-armv/ptrace.h>
 
+#include <asm/io.h>
+
 void do_irq (struct pt_regs *pt_regs)
 {
 	struct s3c24x0_interrupt *irq = s3c24x0_get_base_interrupt();
 	u_int32_t intpnd = readl(&irq->INTPND);
 
 }
+
+//Apollo +
+
+int arch_interrupt_init (void)
+{
+	return 0;
+}
+//Apollo -

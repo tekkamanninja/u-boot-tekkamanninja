@@ -126,7 +126,12 @@ int board_init (void)
 
 	gpio->GPBUP = 0x000007FF;
 
+#if defined(CONFIG_MINI2440) 
+	gpio->GPCCON = 0xAAAAA6AA;
+	gpio->GPCDAT &= ~(1<<5);
+#else
 	gpio->GPCCON = 0xAAAAAAAA;
+#endif
 	gpio->GPCUP = 0xFFFFFFFF;
 	gpio->GPDCON = 0xAAAAAAAA;
 	gpio->GPDUP = 0xFFFFFFFF;
