@@ -151,7 +151,7 @@ int board_init (void)
 
 #if defined(CONFIG_S3C2440)
 /* arch number of S3C2440-Board */
-	gd->bd->bi_arch_number = MACH_TYPE_S3C2440 ;
+	gd->bd->bi_arch_number = MACH_TYPE_MINI2440 ;
 #endif
 
 
