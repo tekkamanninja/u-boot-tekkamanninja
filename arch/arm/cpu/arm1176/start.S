@@ -295,8 +295,23 @@ clbss_l:
 _start_armboot:
 	.word start_armboot
 #else
-	b	nand_boot
+
+/*check boot status */
+#define MEM_CFG_STAT 0x7E00F12C
+
+	ldr	r1, =MEM_CFG_STAT		/* address of reg  MEM_CFG_STAT*/
+	ldr	r0, [r1]
+	mov 	r1, #0x60		
+	and	r1, r0, r1			/*r1 = MEM_CFG_STAT & CFG_BOOT_LOC */
+
+	cmp	r1, #0x60		/*Internal ROM*/
+	beq	boot_from_irom
+	cmp	r1, #0x00		/*Stepping Stone area in NFCON*/
+	beq	nand_boot
+	b	reset
 /*	.word nand_boot*/
+boot_from_irom:
+	b	mmc_boot_copy		/*MINI6410 boot from Internal ROM-->MMC boot*/
 #endif
 
 #ifdef CONFIG_ENABLE_MMU

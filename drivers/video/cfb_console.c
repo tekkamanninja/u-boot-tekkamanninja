@@ -336,6 +336,7 @@ void	console_cursor (int state);
 
 #if defined(LCD_VIDEO_BACKGROUND)
 #include <nand.h>
+#include <mmc.h>
 static void *video_fb_gb_loadaddress;		/* frame buffer address for background*/
 static size_t video_fb_gb_size;
 #endif
@@ -1593,15 +1594,30 @@ static int video_init (void)
 	#if defined(LCD_VIDEO_BACKGROUND_IN_NAND)
 	video_fb_gb_loadaddress =  (void *)LCD_VIDEO_BACKGROUND_LOADADDR;
 	video_fb_gb_size = LCD_VIDEO_BACKGROUND_LOADSIZE;
+
 	ret = nand_read_skip_bad(&nand_info[nand_curr_device], LCD_VIDEO_BACKGROUND_FLASH_ADDR, 
 				&video_fb_gb_size, (u_char *)video_fb_gb_loadaddress);
+
+	#elif defined(LCD_VIDEO_BACKGROUND_IN_MMC)
+	struct mmc *mmc = find_mmc_device(CONFIG_SYS_MMC_ENV_DEV);
+
+	video_fb_gb_loadaddress =  (void *)LCD_VIDEO_BACKGROUND_LOADADDR;
+	video_fb_gb_size = MMC_LCD_VIDEO_BACKGROUND_BLKCNT;
+
+	if (mmc != NULL) {
+		ret = mmc->block_dev.block_read(CONFIG_SYS_MMC_ENV_DEV, MMC_LCD_VIDEO_BACKGROUND_POS,
+						video_fb_gb_size, (uchar *)video_fb_gb_loadaddress);
+	} else {
+		printf("Video: No MMC card for background image!\n");
+	}
 	#else
-	#error Sorry,we only Support background image in nand flash, right now!
+	#error Sorry,we only Support background image in nand flash and SD, right now!
 	#endif
+	ret = (ret == video_fb_gb_size) ? 0 : -1;
 	if (ret == 0)	{
 		ret = video_display_bitmap((ulong)video_fb_gb_loadaddress, 0, 0);
 	} else {
-		PRINTD ("Video: read background image fail!!...\n");	
+		PRINTD ("Video: cannot read background image !\n");	
 	}
 
 

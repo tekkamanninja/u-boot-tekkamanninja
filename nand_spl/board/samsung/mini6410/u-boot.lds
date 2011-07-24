@@ -37,7 +37,7 @@ SECTIONS
 	  start.o	(.text)
 	  cpu_init.o	(.text)
 	  nand_boot.o	(.text)
-
+	  mmc_boot.o	(.text)
 	  *(.text)
 	}
 

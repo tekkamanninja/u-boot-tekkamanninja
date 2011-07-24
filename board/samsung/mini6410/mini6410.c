@@ -37,6 +37,7 @@
 #include <video_fb.h>
 #include <asm/arch/s3c6400.h>
 #include <asm/arch/regs-fb-v4.h>
+#include <asm/arch/mmc.h>
 
 
 
@@ -81,6 +82,24 @@ int board_init(void)
 	gpio->GPJPUDSLP = 0x00000000;
 	//init gpio func for LCD	-
 
+	//init gpio func for MMC	+
+	gpio->GPCCON = 0x22222222;	
+	gpio->GPCPUD = 0x00000000;
+	gpio->GPCCONSLP = 0x00000000;
+	gpio->GPCPUDSLP = 0x00000000;
+
+	gpio->GPGCON = 0x02222222;	
+	gpio->GPGPUD = 0x00000000;
+	gpio->GPGCONSLP = 0x00000000;
+	gpio->GPGPUDSLP = 0x00000000;
+
+	gpio->GPHCON0 = 0x22222222;
+	gpio->GPHCON1 = 0x00000022;	
+	gpio->GPHPUD = 0x00000000;
+	gpio->GPHCONSLP = 0x00000000;
+	gpio->GPHPUDSLP = 0x00000000;
+	//init gpio func for MMC	-
+
 	gd->bd->bi_arch_number = MACH_TYPE;
 	gd->bd->bi_boot_params = PHYS_SDRAM_1 + 0x100;
 
@@ -100,7 +119,13 @@ int dram_init(void)
 #ifdef CONFIG_DISPLAY_BOARDINFO
 int checkboard(void)
 {
+
+	int *infobit, *size;
+	infobit = 0x0C003FF8;
+	size = 0x0C003FFC;
+	
 	printf("Board:   MINI6410\n");
+//	printf("globalSDHCInfoBit : %x globalBlockSizeHide : %x\n",*infobit,*size);
 	return 0;
 }
 #endif
@@ -144,4 +169,14 @@ void board_video_init(GraphicDevice *pGD)
 
 } 
 #endif
+
+
+#ifdef CONFIG_GENERIC_MMC
+int board_mmc_init(bd_t *bis)
+{
+	return s3c64x0_mmc_init(0);
+}
+#endif
+
+
 

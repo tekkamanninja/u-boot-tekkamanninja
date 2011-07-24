@@ -905,6 +905,8 @@
 
 #define ELFIN_MSBM_BASE		0x74100000
 
+#define ELFIN_MMC_BASE		0x7C200000
+
 #ifndef __ASSEMBLY__
 enum s3c64xx_uarts_nr {
 	S3C64XX_UART0,
@@ -938,6 +940,10 @@ static inline void *s3c64xx_get_base_modembuffer(void)
 	return (void *)(ELFIN_MSBM_BASE);
 }
 
+static inline void *samsung_get_base_mmc(void)
+{
+	return (void *)(ELFIN_MMC_BASE);
+}
 #endif
 
 #endif /*__S3C6400_H__*/

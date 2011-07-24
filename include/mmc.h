@@ -274,6 +274,7 @@ struct mmc {
 			struct mmc_cmd *cmd, struct mmc_data *data);
 	void (*set_ios)(struct mmc *mmc);
 	int (*init)(struct mmc *mmc);
+	int (*detect_mmc)(struct mmc_host *mmc_host);
 };
 
 int mmc_register(struct mmc *mmc);

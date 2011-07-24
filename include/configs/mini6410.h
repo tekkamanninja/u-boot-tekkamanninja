@@ -211,8 +211,10 @@
 /* total memory available to uboot */
 #define CONFIG_SYS_UBOOT_SIZE		(1024 * 1024)
 
+#if defined(CONFIG_ENV_IS_IN_NAND)
 /* Put environment copies after the end of U-Boot owned RAM */
 #define CONFIG_NAND_ENV_DST	(CONFIG_SYS_UBOOT_BASE + CONFIG_SYS_UBOOT_SIZE)
+#endif
 
 #ifdef CONFIG_ENABLE_MMU
 #define CONFIG_SYS_MAPPED_RAM_BASE	0xc0000000
@@ -227,7 +229,7 @@
 /* NAND U-Boot load and start address */
 #define CONFIG_SYS_UBOOT_BASE		(CONFIG_SYS_MAPPED_RAM_BASE + 0x07e00000)
 
-#define CONFIG_ENV_OFFSET		0x0080000
+
 
 /* NAND configuration */
 #define CONFIG_SYS_MAX_NAND_DEVICE	1
@@ -288,7 +290,9 @@
 */
 
 /* Settings as above boot configuration */
-#define CONFIG_ENV_IS_IN_NAND
+
+//#define CONFIG_ENV_IS_IN_NAND
+
 #define CONFIG_BOOTARGS		"console=ttySAC,115200"
 
 #if !defined(CONFIG_ENABLE_MMU)
@@ -337,7 +341,8 @@
 #define LCD_VIDEO_BACKGROUND_LOADADDR         	(0x57700000) 
 #define LCD_VIDEO_BACKGROUND_LOADSIZE         	(0x40000) 
 #define LCD_VIDEO_BACKGROUND_ALPHA         	(0xa)
-#define LCD_VIDEO_BACKGROUND_IN_NAND	
+//#define LCD_VIDEO_BACKGROUND_IN_NAND	
+#define LCD_VIDEO_BACKGROUND_IN_MMC	
 #define LCD_VIDEO_BACKGROUND_FLASH_ADDR		(0xa0000)
 #endif
 #define CONFIG_SYS_VIDEO_VCLOCK_HZ		(133000000)		
@@ -351,6 +356,64 @@
 #endif  /*enable LCD display*/ 
 
 
+/* MMC */
+#define CONFIG_GENERIC_MMC		1
+#define CONFIG_MMC			1
+#define CONFIG_S3C64X0_MMC			1
+#define CONFIG_CMD_MMC		/* MMC support			*/
+#define CONFIG_ENV_IS_IN_MMC		1
+#define CONFIG_SYS_MMC_ENV_DEV		0
 
+
+/* MMC_BOOT */
+#define CONFIG_SYS_MMC_U_BOOT_OFFS	(4 * 1024)	/* Offset to RAM U-Boot image */
+#define CONFIG_SYS_MMC_U_BOOT_SIZE	(512 * 1024)	/* Size of RAM U-Boot image   */
+#define MMC_LCD_VIDEO_BACKGROUND_SIZE	(0x20000)
+
+#define MMC_BOOT_CHANNEL		0
+#define MMC_INIT_REQUIRED		0
+
+
+#define	TCM_BASE		(0x0C004000)
+
+/* size information */
+#define BL1_SIZE		(8 * 1024)
+#define eFUSE_SIZE		(1 * 1024)	// 0.5k eFuse, 0.5k reserved
+
+/* movinand definitions */
+#define MMC_BLKSIZE		(512)
+
+#define MMC_TOTAL_BLKCNT	(*((volatile unsigned int*)(TCM_BASE - 0x4)))
+#define MMC_HIGH_CAPACITY	(*((volatile unsigned int*)(TCM_BASE - 0x8)))
+
+#define MMC_UBOOT_POS_BACKWARD			(0x300000)
+#define MMC_ENV_POS_BACKWARD			(0x280000)
+#define MMC_BACKGROUND_POS_BACKWARD		(0x260000)
+
+
+#define MMC_UBOOT_POS		(MMC_TOTAL_BLKCNT - (MMC_UBOOT_POS_BACKWARD/MMC_BLKSIZE))
+#define MMC_ENV_POS		(MMC_TOTAL_BLKCNT - (MMC_ENV_POS_BACKWARD/MMC_BLKSIZE))
+
+#define MMC_UBOOT_BLKCNT	(CONFIG_SYS_MMC_U_BOOT_SIZE / MMC_BLKSIZE)
+#define MMC_ENV_BLKCNT		(CONFIG_ENV_SIZE / MMC_BLKSIZE)
+#define CONFIG_MMC_ENV_DST	(CONFIG_SYS_UBOOT_BASE + CONFIG_SYS_UBOOT_SIZE)
+
+#define CONFIG_SYS_MMC_U_BOOT_DST	CONFIG_SYS_PHY_UBOOT_BASE	/* NUB load-addr      */
+#define CONFIG_SYS_MMC_U_BOOT_START	CONFIG_SYS_MMC_U_BOOT_DST	/* NUB start-addr     */
+
+
+
+#if defined(LCD_VIDEO_BACKGROUND_IN_MMC)  
+#define MMC_LCD_VIDEO_BACKGROUND_POS	((mmc->block_dev.lba) - (MMC_BACKGROUND_POS_BACKWARD/MMC_BLKSIZE)-1024)
+#define MMC_LCD_VIDEO_BACKGROUND_BLKCNT		(MMC_LCD_VIDEO_BACKGROUND_SIZE / MMC_BLKSIZE)
+#endif
+
+#if defined(CONFIG_ENV_IS_IN_NAND)
+#define CONFIG_ENV_OFFSET		0x0080000
+#else defined(CONFIG_ENV_IS_IN_MMC)
+#define CONFIG_ENV_OFFSET		((mmc->block_dev.lba) - (MMC_ENV_POS_BACKWARD/MMC_BLKSIZE)-1024)
+#define CONFIG_MMC_ENV_DST	(CONFIG_SYS_UBOOT_BASE + CONFIG_SYS_UBOOT_SIZE)
+/* OFFSET in block size to support  more than 4G size SD card */ 
+#endif
 
 #endif	/* __CONFIG_H */
