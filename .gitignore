@@ -45,8 +45,9 @@ patches-*
 .stgit-edit.txt
 
 # quilt's files
-patches
+patches/
 series
+.pc/
 
 # gdb files
 .gdb_history
