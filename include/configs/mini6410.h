@@ -198,7 +198,7 @@
  * FLASH and environment organization
  */
 #define CONFIG_SYS_NO_FLASH
-#define CONFIG_ENV_SIZE		0x4000	/* Total Size of Environment Sector */
+#define CONFIG_ENV_SIZE		0x20000	/* Total Size of Environment Sector */
 
 /*
  * MINI6410 board specific data
@@ -227,7 +227,7 @@
 /* NAND U-Boot load and start address */
 #define CONFIG_SYS_UBOOT_BASE		(CONFIG_SYS_MAPPED_RAM_BASE + 0x07e00000)
 
-#define CONFIG_ENV_OFFSET		0x0040000
+#define CONFIG_ENV_OFFSET		0x0080000
 
 /* NAND configuration */
 #define CONFIG_SYS_MAX_NAND_DEVICE	1
@@ -307,5 +307,50 @@
 #if defined(CONFIG_USB_OHCI_NEW) && defined(CONFIG_ENABLE_MMU)
 # error "usb_ohci.c is currently broken with MMU enabled."
 #endif
+
+#if 1			
+//enable LCD display
+#define CONFIG_CMD_BMP 
+#define CONFIG_VIDEO 
+#define CONFIG_VIDEO_S3C64X0	 
+#define CONFIG_VIDEO_LOGO 
+#define VIDEO_FB_16BPP_WORD_SWAP    //for BMP logo 
+
+#define CONFIG_VIDEO_SW_CURSOR 
+//#define CONFIG_VIDEO_BMP_LOGO
+//#define CONFIG_CONSOLE_EXTRA_INFO
+//#define CONFIG_CONSOLE_CURSOR
+//#define CONFIG_CONSOLE_TIME
+#define CONFIG_CFB_CONSOLE
+#define CONFIG_SYS_CONSOLE_IS_IN_ENV
+//#define CFG_CONSOLE_INFO_QUIET 
+//#define VIDEO_FB_LITTLE_ENDIAN 
+#define CONFIG_SPLASH_SCREEN 
+#define CONFIG_SYS_VIDEO_LOGO_MAX_SIZE         (1024*768+1024+100) /* 100 = slack */ 
+#define CONFIG_VIDEO_BMP_GZIP 
+#define CONFIG_CMD_UNZIP 
+#define LCD_VIDEO_ADDR         0x57a00000 
+#define LCD_VIDEO_BACKGROUND
+
+#if defined(LCD_VIDEO_BACKGROUND)  
+#define LCD_VIDEO_BACKGROUND_ADDR         	(0x57900000) 
+#define LCD_VIDEO_BACKGROUND_LOADADDR         	(0x57700000) 
+#define LCD_VIDEO_BACKGROUND_LOADSIZE         	(0x40000) 
+#define LCD_VIDEO_BACKGROUND_ALPHA         	(0xa)
+#define LCD_VIDEO_BACKGROUND_IN_NAND	
+#define LCD_VIDEO_BACKGROUND_FLASH_ADDR		(0xa0000)
+#endif
+#define CONFIG_SYS_VIDEO_VCLOCK_HZ		(133000000)		
+   
+//RAM_TEXT = 0x57e00000
+
+/*for PC-keyboard*/
+#define VIDEO_KBD_INIT_FCT     0 
+#define VIDEO_TSTC_FCT         serial_tstc 
+#define VIDEO_GETC_FCT         serial_getc
+#endif  /*enable LCD display*/ 
+
+
+
 
 #endif	/* __CONFIG_H */

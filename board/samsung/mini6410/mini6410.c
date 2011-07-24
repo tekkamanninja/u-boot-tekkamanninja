@@ -32,7 +32,13 @@
  */
 
 #include <common.h>
+#include <net.h>
+#include <netdev.h>
+#include <video_fb.h>
 #include <asm/arch/s3c6400.h>
+#include <asm/arch/regs-fb-v4.h>
+
+
 
 static inline void delay(unsigned long loops)
 {
@@ -48,6 +54,32 @@ static inline void delay(unsigned long loops)
 int board_init(void)
 {
 	DECLARE_GLOBAL_DATA_PTR;
+	s3c64xx_gpio * const gpio = s3c64xx_get_base_gpio();
+
+	//init gpio func for LCD	+
+	gpio->GPECON = 0x00011111;	//GPE0: for LCD Backlight ON-OFF. GPE1~4 is GPIO.
+	gpio->GPEDAT =  0x00000001;	//Backlight ON  (some LCD(3.5) need it ,but NEC 4.3 not)
+	gpio->GPEPUD = 0x00000000;
+	gpio->GPECONSLP = 0x00000000;
+	gpio->GPEPUDSLP = 0x00000000;
+
+	gpio->GPFCON = 0x96AAAAAA;	//PWM1: for Backlight Dimming. GPF13 is USB_PWR. GPF0~12 is CAM I/F.
+					// PWM0 Control Buzzer,but now we config it as OUTPUT!!!
+	gpio->GPFDAT =  0x00002000;	//USB_PWR ON . Buzzer OFF .
+	gpio->GPFPUD = 0x00000000;
+	gpio->GPFCONSLP = 0x00000000;
+	gpio->GPFPUDSLP = 0x00000000;
+
+	gpio->GPICON = 0xAAAAAAAA;
+	gpio->GPIPUD = 0x00000000;
+	gpio->GPICONSLP = 0x00000000;
+	gpio->GPIPUDSLP = 0x00000000;
+
+	gpio->GPJCON = 0x00AAAAAA;
+	gpio->GPJPUD = 0x00000000;
+	gpio->GPJCONSLP = 0x00000000;
+	gpio->GPJPUDSLP = 0x00000000;
+	//init gpio func for LCD	-
 
 	gd->bd->bi_arch_number = MACH_TYPE;
 	gd->bd->bi_boot_params = PHYS_SDRAM_1 + 0x100;
@@ -96,3 +128,20 @@ int board_eth_init(bd_t *bi)
 	return rc;
 }
 #endif
+
+#ifdef CONFIG_VIDEO_S3C64X0	//FIXME
+
+
+//just init some reg for enable LCD 
+void board_video_init(GraphicDevice *pGD) 
+{ 
+	s3c64xx_gpio * const gpio = s3c64xx_get_base_gpio();
+	s3c64xx_modem * const modem = s3c64xx_get_base_modem();
+
+	gpio->SPCON &=  ~(LCD_SEL_MASK << LCD_SEL);
+	gpio->SPCON |=  (0x01 << LCD_SEL);	
+	modem->MIFPCON &= ~(1 << SEL_BYPASS);
+
+} 
+#endif
+

@@ -381,6 +381,8 @@
 #define S3C64XX_MEM_SYS_CFG_NAND	0x0008
 #define S3C64XX_MEM_SYS_CFG_ONENAND	S3C64XX_MEM_SYS_CFG_16BIT
 
+#if 0			//masking it for "typedef struct {.....} s3c64xx_gpio;"  tekkamanninja
+
 #define GPACON		(ELFIN_GPIO_BASE + GPACON_OFFSET)
 #define GPADAT		(ELFIN_GPIO_BASE + GPADAT_OFFSET)
 #define GPAPUD		(ELFIN_GPIO_BASE + GPAPUD_OFFSET)
@@ -461,7 +463,7 @@
 #define GPQPUD		(ELFIN_GPIO_BASE + GPQPUD_OFFSET)
 #define GPQCONSLP	(ELFIN_GPIO_BASE + GPQCONSLP_OFFSET)
 #define GPQPUDSLP	(ELFIN_GPIO_BASE + GPQPUDSLP_OFFSET)
-
+#endif
 /*
  * Memory controller
  */
@@ -886,6 +888,23 @@
 /* 2b01 : mDDR */
 #define DMC_DDR_USER_CONFIG	1
 
+/*
+ *  display controller
+ */
+#define ELFIN_FB_BASE		0x77100000
+
+
+#define LCD_SEL			0
+#define LCD_SEL_MASK		0x03
+
+
+#define ELFIN_MODEM_BASE	0x74108000
+#define INT2M_LEVEL		4
+#define SEL_BYPASS		3
+#define SEL_RS			0
+
+#define ELFIN_MSBM_BASE		0x74100000
+
 #ifndef __ASSEMBLY__
 enum s3c64xx_uarts_nr {
 	S3C64XX_UART0,
@@ -899,6 +918,26 @@ static inline s3c64xx_uart *s3c64xx_get_base_uart(enum s3c64xx_uarts_nr nr)
 {
 	return (s3c64xx_uart *)(ELFIN_UART_BASE + (nr * 0x400));
 }
+
+static inline s3c64xx_fb *s3c64xx_get_base_fb(void)
+{
+	return (s3c64xx_fb *)(ELFIN_FB_BASE);
+}
+static inline s3c64xx_gpio *s3c64xx_get_base_gpio(void)
+{
+	return (s3c64xx_gpio *)(ELFIN_GPIO_BASE);
+}
+
+static inline s3c64xx_modem *s3c64xx_get_base_modem(void)
+{
+	return (s3c64xx_modem *)(ELFIN_MODEM_BASE);
+}
+
+static inline void *s3c64xx_get_base_modembuffer(void)
+{
+	return (void *)(ELFIN_MSBM_BASE);
+}
+
 #endif
 
 #endif /*__S3C6400_H__*/

@@ -334,6 +334,11 @@ void	console_cursor (int state);
 #define PRINTD(x)
 #endif
 
+#if defined(LCD_VIDEO_BACKGROUND)
+#include <nand.h>
+static void *video_fb_gb_loadaddress;		/* frame buffer address for background*/
+static size_t video_fb_gb_size;
+#endif
 
 #ifdef CONFIG_CONSOLE_EXTRA_INFO
 extern void video_get_info_str (    /* setup a board string: type, speed, etc. */
@@ -1107,10 +1112,23 @@ int video_display_bitmap (ulong bmp_image, int x, int y)
 		height = VIDEO_VISIBLE_ROWS - y;
 
 	bmap = (uchar *) bmp + le32_to_cpu (bmp->header.data_offset);
+
+#if defined(LCD_VIDEO_BACKGROUND)
+	if (bmp_image == (ulong )LCD_VIDEO_BACKGROUND_LOADADDR)	{
+	fb = (uchar *) (LCD_VIDEO_BACKGROUND_ADDR +
+			((y + height - 1) * VIDEO_COLS * VIDEO_PIXEL_SIZE) +
+			x * VIDEO_PIXEL_SIZE);
+	} else {
 	fb = (uchar *) (video_fb_address +
 			((y + height - 1) * VIDEO_COLS * VIDEO_PIXEL_SIZE) +
 			x * VIDEO_PIXEL_SIZE);
+	}
 
+#else
+	fb = (uchar *) (video_fb_address +
+			((y + height - 1) * VIDEO_COLS * VIDEO_PIXEL_SIZE) +
+			x * VIDEO_PIXEL_SIZE);
+#endif
 #ifdef CONFIG_VIDEO_BMP_RLE8
 	if (compression == BMP_BI_RLE8) {
 		return display_rle8_bitmap(bmp,
@@ -1503,6 +1521,7 @@ static void *video_logo (void)
 static int video_init (void)
 {
 	unsigned char color8;
+	int ret;
 
 	if ((pGD = video_hw_init ()) == NULL)
 		return -1;
@@ -1568,6 +1587,26 @@ static int video_init (void)
 #else
 	video_console_address = video_fb_address;
 #endif
+
+#if defined(LCD_VIDEO_BACKGROUND)
+	PRINTD ("Video: Drawing the background ...\n");
+	#if defined(LCD_VIDEO_BACKGROUND_IN_NAND)
+	video_fb_gb_loadaddress =  (void *)LCD_VIDEO_BACKGROUND_LOADADDR;
+	video_fb_gb_size = LCD_VIDEO_BACKGROUND_LOADSIZE;
+	ret = nand_read_skip_bad(&nand_info[nand_curr_device], LCD_VIDEO_BACKGROUND_FLASH_ADDR, 
+				&video_fb_gb_size, (u_char *)video_fb_gb_loadaddress);
+	#else
+	#error Sorry,we only Support background image in nand flash, right now!
+	#endif
+	if (ret == 0)	{
+		ret = video_display_bitmap((ulong)video_fb_gb_loadaddress, 0, 0);
+	} else {
+		PRINTD ("Video: read background image fail!!...\n");	
+	}
+
+
+#endif
+
 
 	/* Initialize the console */
 	console_col = 0;
