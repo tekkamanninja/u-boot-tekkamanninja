@@ -37,7 +37,7 @@ extern struct serial_device eserial4_device;
 
 #endif
 
-#if defined(CONFIG_S3C2410)
+#if defined(CONFIG_S3C2410) ||  defined(CONFIG_S3C2440)
 extern struct serial_device s3c24xx_serial0_device;
 extern struct serial_device s3c24xx_serial1_device;
 extern struct serial_device s3c24xx_serial2_device;

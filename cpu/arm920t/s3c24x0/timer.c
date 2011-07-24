@@ -181,6 +181,7 @@ ulong get_tbclk(void)
 	tbclk = timer_load_val * 100;
 #elif defined(CONFIG_SBC2410X) || \
       defined(CONFIG_SMDK2410) || \
+      defined(CONFIG_MINI2440) || \
       defined(CONFIG_VCMA9)
 	tbclk = CONFIG_SYS_HZ;
 #else

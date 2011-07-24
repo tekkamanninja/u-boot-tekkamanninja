@@ -63,7 +63,13 @@ static ulong get_PLLCLK(int pllreg)
 	m = ((r & 0xFF000) >> 12) + 8;
 	p = ((r & 0x003F0) >> 4) + 2;
 	s = r & 0x3;
-
+//tekkaman
+#if defined(CONFIG_S3C2440)
+	if (pllreg == MPLL)
+	return ((CONFIG_SYS_CLK_FREQ * m * 2) /(p << s));
+	else if (pllreg == UPLL)
+#endif
+//tekkaman
 	return (CONFIG_SYS_CLK_FREQ * m) / (p << s);
 }
 
@@ -78,7 +84,21 @@ ulong get_HCLK(void)
 {
 	struct s3c24x0_clock_power *clk_power = s3c24x0_get_base_clock_power();
 
-	return (readl(&clk_power->CLKDIVN) & 2) ? get_FCLK() / 2 : get_FCLK();
+//	return (readl(&clk_power->CLKDIVN) & 2) ? get_FCLK() / 2 : get_FCLK();
+//tekkaman
+#if defined(CONFIG_S3C2440)
+	if (readl(&clk_power->CLKDIVN) & 0x6) 
+				{
+				if ((readl(&clk_power->CLKDIVN) & 0x6)==2) return(get_FCLK()/2);
+				if ((readl(&clk_power->CLKDIVN) & 0x6)==6) return((readl(&clk_power->CAMDIVN) & 0x100) ? get_FCLK()/6 : get_FCLK()/3);
+				if ((readl(&clk_power->CLKDIVN) & 0x6)==4) return((readl(&clk_power->CAMDIVN) & 0x200) ? get_FCLK()/8 : get_FCLK()/4);
+				return(get_FCLK());
+				}
+	else	return(get_FCLK());
+#else
+	return((readl(&clk_power->CLKDIVN) & 0x2) ? get_FCLK()/2 : get_FCLK());
+#endif
+//tekkaman
 }
 
 /* return PCLK frequency */

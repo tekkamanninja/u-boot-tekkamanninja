@@ -78,7 +78,7 @@ struct s3c24x0_interrupt {
 	u32	PRIORITY;
 	u32	INTPND;
 	u32	INTOFFSET;
-#ifdef CONFIG_S3C2410
+#if defined(CONFIG_S3C2410) || defined (CONFIG_S3C2440)
 	u32	SUBSRCPND;
 	u32	INTSUBMSK;
 #endif
@@ -88,11 +88,11 @@ struct s3c24x0_interrupt {
 /* DMAS (see manual chapter 8) */
 struct s3c24x0_dma {
 	u32	DISRC;
-#ifdef CONFIG_S3C2410
+#if defined(CONFIG_S3C2410) || defined (CONFIG_S3C2440)
 	u32	DISRCC;
 #endif
 	u32	DIDST;
-#ifdef CONFIG_S3C2410
+#if defined(CONFIG_S3C2410) || defined (CONFIG_S3C2440)
 	u32	DIDSTC;
 #endif
 	u32	DCON;
@@ -103,7 +103,7 @@ struct s3c24x0_dma {
 #ifdef CONFIG_S3C2400
 	u32	res[1];
 #endif
-#ifdef CONFIG_S3C2410
+#if defined(CONFIG_S3C2410) || defined (CONFIG_S3C2440)
 	u32	res[7];
 #endif
 };
@@ -122,6 +122,9 @@ struct s3c24x0_clock_power {
 	u32	CLKCON;
 	u32	CLKSLOW;
 	u32	CLKDIVN;
+#if defined (CONFIG_S3C2440)
+	u32	CAMDIVN;
+#endif
 };
 
 
@@ -141,7 +144,7 @@ struct s3c24x0_lcd {
 	u32	res[8];
 	u32	DITHMODE;
 	u32	TPAL;
-#ifdef CONFIG_S3C2410
+#if defined(CONFIG_S3C2410) || defined (CONFIG_S3C2440)
 	u32	LCDINTPND;
 	u32	LCDSRCPND;
 	u32	LCDINTMSK;
@@ -149,7 +152,7 @@ struct s3c24x0_lcd {
 #endif
 };
 
-
+#if defined(CONFIG_S3C2410)
 /* NAND FLASH (see S3C2410 manual chapter 6) */
 struct s3c2410_nand {
 	u32	NFCONF;
@@ -159,7 +162,28 @@ struct s3c2410_nand {
 	u32	NFSTAT;
 	u32	NFECC;
 };
-
+#endif
+#if defined (CONFIG_S3C2440)
+/* NAND FLASH (see S3C2440 manual chapter 6) */
+struct s3c2410_nand {
+	u32	NFCONF;
+	u32	NFCONT;
+	u32	NFCMD;
+	u32	NFADDR;
+	u32	NFDATA;
+	u32	NFMECCD0;
+	u32	NFMECCD1;
+	u32	NFSECCD;
+	u32	NFSTAT;
+	u32	NFESTAT0;
+	u32	NFESTAT1;
+	u32	NFMECC0;
+	u32	NFMECC1;
+	u32	NFSECC;
+	u32	NFSBLK;
+	u32	NFEBLK;
+};
+#endif
 
 /* UART (see manual chapter 11) */
 struct s3c24x0_uart {
@@ -298,13 +322,13 @@ struct s3c24x0_usb_device {
 	u8	INDEX_REG;
 	u8	res9[7];
 	u8	MAXP_REG;
-	u8	res10[7];
+	u8	res10[3];
 	u8	EP0_CSR_IN_CSR1_REG;
 	u8	res11[3];
 	u8	IN_CSR2_REG;
-	u8	res12[3];
+	u8	res12[7];
 	u8	OUT_CSR1_REG;
-	u8	res13[7];
+	u8	res13[3];
 	u8	OUT_CSR2_REG;
 	u8	res14[3];
 	u8	OUT_FIFO_CNT1_REG;
@@ -312,8 +336,14 @@ struct s3c24x0_usb_device {
 	u8	OUT_FIFO_CNT2_REG;
 	u8	res16[3];
 #endif /*  __BIG_ENDIAN */
-	struct s3c24x0_usb_dev_fifos	fifo[5];
-	struct s3c24x0_usb_dev_dmas	dma[5];
+	u32	res17[8];
+ 	struct s3c24x0_usb_dev_fifos	fifo[5];
+	u32	res18[11];
+	struct s3c24x0_usb_dev_dmas	ep1;
+	struct s3c24x0_usb_dev_dmas	ep2;
+	u8	res19[16];
+	struct s3c24x0_usb_dev_dmas	ep3;
+	struct s3c24x0_usb_dev_dmas	ep4;
 };
 
 
@@ -397,7 +427,7 @@ struct s3c24x0_gpio {
 	u32	MISCCR;
 	u32	EXTINT;
 #endif
-#ifdef CONFIG_S3C2410
+#if defined(CONFIG_S3C2410) || defined (CONFIG_S3C2440)
 	u32	GPACON;
 	u32	GPADAT;
 	u32	res1[2];
@@ -446,6 +476,14 @@ struct s3c24x0_gpio {
 	u32	GSTATUS2;
 	u32	GSTATUS3;
 	u32	GSTATUS4;
+#if defined (CONFIG_S3C2440)
+	u32	res9[3];
+	u32	MSLCON;
+	u32	GPJCON;
+	u32	GPJDAT;
+	u32	GPJUP;
+
+#endif
 #endif
 };
 
@@ -639,6 +677,8 @@ struct s3c2410_sdi {
 	u32	SDIDCNT;
 	u32	SDIDSTA;
 	u32	SDIFSTA;
+#if defined(CONFIG_S3C2410)
+#if 0
 #ifdef __BIG_ENDIAN
 	u8	res[3];
 	u8	SDIDAT;
@@ -646,7 +686,13 @@ struct s3c2410_sdi {
 	u8	SDIDAT;
 	u8	res[3];
 #endif
+#endif
+	u32	SDIDAT;
 	u32	SDIIMSK;
+#elif defined(CONFIG_S3C2440)
+	u32	SDIIMSK;
+	u32	SDIDAT;
+#endif
 };
 
 #endif /*__S3C24X0_H__*/
