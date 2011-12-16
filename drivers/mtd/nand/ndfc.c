@@ -113,7 +113,7 @@ static void ndfc_read_buf(struct mtd_info *mtdinfo, uint8_t *buf, int len)
 		*p++ = in_be32((u32 *)(base + NDFC_DATA));
 }
 
-#ifndef CONFIG_NAND_SPL
+#if !(defined(CONFIG_NAND_SPL) || defined(CONFIG_BOOT_AUTODETECT)
 /*
  * Don't use these speedup functions in NAND boot image, since the image
  * has to fit into 4kByte.
@@ -140,7 +140,7 @@ static int ndfc_verify_buf(struct mtd_info *mtdinfo, const uint8_t *buf, int len
 
 	return 0;
 }
-#endif /* #ifndef CONFIG_NAND_SPL */
+#endif /* #if !(defined(CONFIG_NAND_SPL) || defined(CONFIG_BOOT_AUTODETECT) */
 
 #ifndef CONFIG_SYS_NAND_BCR
 #define CONFIG_SYS_NAND_BCR 0x80002222
@@ -198,7 +198,7 @@ int board_nand_init(struct nand_chip *nand)
 	nand->ecc.bytes = 3;
 	nand->select_chip = ndfc_select_chip;
 
-#ifndef CONFIG_NAND_SPL
+#if !(defined(CONFIG_NAND_SPL) || defined(CONFIG_BOOT_AUTODETECT)
 	nand->write_buf  = ndfc_write_buf;
 	nand->verify_buf = ndfc_verify_buf;
 

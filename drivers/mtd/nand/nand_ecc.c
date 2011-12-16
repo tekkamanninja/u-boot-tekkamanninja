@@ -50,7 +50,7 @@
  * only nand_correct_data() is needed
  */
 
-#ifndef CONFIG_NAND_SPL
+#if !(defined(CONFIG_NAND_SPL) || defined(CONFIG_BOOT_AUTODETECT))
 /*
  * Pre-calculated 256-way 1 byte column parity
  */
@@ -132,7 +132,7 @@ int nand_calculate_ecc(struct mtd_info *mtd, const u_char *dat,
 
 	return 0;
 }
-#endif /* CONFIG_NAND_SPL */
+#endif /* CONFIG_NAND_SPL||CONFIG_MMC_SPL */
 
 static inline int countbits(uint32_t byte)
 {
