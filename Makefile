@@ -451,6 +451,9 @@ mmc_spl:	$(TIMESTAMP_FILE) $(VERSION_FILE) depend
 		$(MAKE) -C mmc_spl/board/$(BOARDDIR) all
 
 $(obj)mmc_spl/u-boot-mmc-spl.bin:	mmc_spl
+ifdef CONFIG_BOOT_AUTODETECT
+		cat $(obj)mmc_spl/u-boot-spl-16k.bin $(obj)u-boot.bin > $(obj)u-boot-mmc.bin
+endif
 
 $(TIMESTAMP_FILE):
 		@LC_ALL=C date +'#define U_BOOT_DATE "%b %d %C%y"' > $@
@@ -1046,6 +1049,21 @@ smdk6400_config	:	unconfig
 	fi
 	@$(MKCONFIG) smdk6400 arm arm1176 smdk6400 samsung s3c64xx
 	@echo "CONFIG_NAND_U_BOOT = y" >> $(obj)include/config.mk
+
+mini6410_noUSB_config   \
+mini6410_config :	unconfig
+	@mkdir -p $(obj)include $(obj)board/samsung/mini6410
+	@mkdir -p $(obj)nand_spl/board/samsung/mini6410
+	@echo "#define CONFIG_NAND_U_BOOT" > $(obj)include/config.h
+	@echo "#define CONFIG_MMC_U_BOOT" >> $(obj)include/config.h
+	@if [ -z "$(findstring mini6410_noUSB_config,$@)" ]; then			\
+		echo "RAM_TEXT = 0x57e00000" >> $(obj)board/samsung/mini6410/config.tmp;\
+	else										\
+		echo "RAM_TEXT = 0xc7e00000" >> $(obj)board/samsung/mini6410/config.tmp;\
+	fi
+	@$(MKCONFIG) mini6410 arm arm1176 mini6410 samsung s3c64xx
+	@echo "CONFIG_NAND_U_BOOT = y" >> $(obj)include/config.mk
+	@echo "CONFIG_MMC_U_BOOT = y" >> $(obj)include/config.mk
 
 #========================================================================
 # Nios

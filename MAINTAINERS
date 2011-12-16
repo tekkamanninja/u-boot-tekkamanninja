@@ -907,6 +907,11 @@ Sughosh Ganu <urwithsughosh@gmail.com>
 
 	hawkboard	ARM926EJS (OMAP-L138)
 
+Alex Ling <kasimling at gmail.com>
+Tekkaman Ninja  <tekkamanninja at gmail.com>
+
+	MINI6410	ARM1176JZF-S (S3C6410)
+
 -------------------------------------------------------------------------
 
 Unknown / orphaned boards:
