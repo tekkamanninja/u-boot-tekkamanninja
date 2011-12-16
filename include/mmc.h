@@ -27,6 +27,7 @@
 #define _MMC_H_
 
 #include <linux/list.h>
+#include <asm/arch/mmc.h>   //for struct mmc_host~~~~~tekkamanninja
 
 #define SD_VERSION_SD	0x20000
 #define SD_VERSION_2	(SD_VERSION_SD | 0x20)
@@ -291,6 +292,7 @@ struct mmc {
 			struct mmc_cmd *cmd, struct mmc_data *data);
 	void (*set_ios)(struct mmc *mmc);
 	int (*init)(struct mmc *mmc);
+	int (*detect_mmc)(struct mmc_host *mmc_host);
 	uint b_max;
 };
 
