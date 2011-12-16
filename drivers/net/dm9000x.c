@@ -475,6 +475,14 @@ static int dm9000_rx(struct eth_device *netdev)
 		   only look at bits 0:1, See application notes DM9000 */
 		rxbyte = DM9000_inb(DM9000_DATA) & 0x03;
 
+		//MR. xiao
+		#if 1
+		 u8 temp; 
+		 temp=DM9000_ior(DM9000_MRRH); 
+		 temp=DM9000_ior(DM9000_MRRL);
+		#endif 	
+		//MR. xiao
+	
 		/* Status check: this byte must be 0 or 1 */
 		if (rxbyte > DM9000_PKT_RDY) {
 			DM9000_iow(DM9000_RCR, 0x00);	/* Stop Device */
